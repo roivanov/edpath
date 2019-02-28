@@ -50,11 +50,11 @@ SYSTEMS = [System('Great Annihilator', 'Great Annihilator'),
            System('Byoomao MI-S e4-5423', 'Wulfric'),
            System('Sagittarius A*', 'Sagittarius A*'),
 
-           System('Kyli Flyuae WO-A f39', 'Dance of the Compact Quartet'),
-           System('Myriesly DQ-G d10-1240', 'Insinnergy\'s World'),
-           System('Myriesly RY-S e3-5414', 'Six Rings'),
-           System('Myriesly CL-P e5-4186', 'Emerald Remnant'),
-           System('Myriesly CL-P e5-7383', 'Fenrisulfur'),
+        #    System('Kyli Flyuae WO-A f39', 'Dance of the Compact Quartet'),
+        #    System('Myriesly DQ-G d10-1240', 'Insinnergy\'s World'),
+        #    System('Myriesly RY-S e3-5414', 'Six Rings'),
+        #    System('Myriesly CL-P e5-4186', 'Emerald Remnant'),
+        #    System('Myriesly CL-P e5-7383', 'Fenrisulfur'),
 
            System('STUEMEAE KM-W C1-342', 'WP7 Altum Sagittarii'),
           ]
@@ -63,7 +63,9 @@ if __name__ == '__main__':
     if not os.path.exists(CACHE_DIR):
         os.mkdir(CACHE_DIR)
 
+    # dictionary of sytem name:system coordinates
     all_systems = {}
+    # dictionary of system name:system alias
     aliases = {}
 
     # load data
