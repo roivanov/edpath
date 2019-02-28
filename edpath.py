@@ -33,22 +33,26 @@ class System(namedtuple('System', 'name alias')):
 
 class PathTo(object):
     """Compute path"""
-    def __init__(self, path):
-        self._path = path
+    def __init__(self, start, finish, poi=None):
+        self._start = start
+        self._finish = finish
+        # POI
+        self.poi = poi or []
         self.limit = 0
 
     @property
     def length(self):
         """Compute distance on the path"""
+        path = [self._start] + self.poi + [self._finish]
         if self.limit == 0:
-            return sum([self._path[_i].distance_to(self._path[_i + 1])
-                        for _i in range(len(self._path) - 1)])
+            return sum([path[_i].distance_to(path[_i + 1])
+                        for _i in range(len(path) - 1)])
         else:
             ret = 0
             # return as soon as sum is above
             # set limit to start using this branch
-            for _i in range(len(self._path) - 1):
-                ret += self._path[_i].distance_to(self._path[_i + 1])
+            for _i in range(len(path) - 1):
+                ret += path[_i].distance_to(path[_i + 1])
                 if ret > self.limit:
                     return ret
 
@@ -125,10 +129,8 @@ if __name__ == '__main__':
 
     # firect path from A to Z
     original_order = [x.name for x in SYSTEMS]
-    start_point = all_systems[original_order[0]]
-    final_point = all_systems[original_order[-1]]
-    direct_path = PathTo([start_point, final_point])
-    print('Direct path is %s', direct_path.length)
+    mypath = PathTo(all_systems[original_order[0]], all_systems[original_order[-1]])
+    print('Direct path is %s', mypath.length)
 
     # all permutations
     best_order = None
@@ -136,13 +138,12 @@ if __name__ == '__main__':
     i = itertools.permutations(original_order[1:-1])
     for each in i:
         print(each)
-        perm_list = [start_point] + list([all_systems[x] for x in each]) + [final_point]
-        curr_path = PathTo(perm_list)
+        mypath.poi = list([all_systems[x] for x in each])
         # set limit
         if best_len > 0:
-            curr_path.limit = best_len
+            mypath.limit = best_len
 
-        curr_len = curr_path.length
+        curr_len = mypath.length
         print('Current path is %s', curr_len)
         if best_len == 0 or curr_len < best_len:
             best_len = curr_len
@@ -171,3 +172,6 @@ if __name__ == '__main__':
 # using for loop and eject
 # python edpath.py  105.36s user 0.46s system 99% cpu 1:46.05 total
 # tail  60.99s user 0.67s system 58% cpu 1:46.05 total
+
+# python edpath.py  79.96s user 0.36s system 99% cpu 1:20.48 total
+# tail  46.56s user 0.52s system 58% cpu 1:20.48 total
