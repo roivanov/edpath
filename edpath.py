@@ -5,6 +5,7 @@ from __future__ import print_function, unicode_literals
 
 import hashlib
 import json
+import math
 import os
 import time
 import urllib
@@ -12,7 +13,9 @@ from collections import OrderedDict, namedtuple
 
 import requests
 
-SYSTEMS = ['Great Annihilator', 'STUEMEAE KM-W C1-342']
+SYSTEMS = ['Great Annihilator',
+           'Hypoe Flyi HW-W e1-7966',
+           'STUEMEAE KM-W C1-342']
 
 API_CALL = 'https://www.edsm.net/api-v1/system'
 DELAY = 3
@@ -20,7 +23,12 @@ CACHE_DIR = '.edpathcache'
 
 class Coords(namedtuple('Coords', 'x y z')):
     """XYZ coordinates"""
-    pass
+    def distance_to(self, other):
+        """compute distance between two points"""
+        assert isinstance(other, Coords)
+        return math.sqrt(sum([math.pow(self.x - other.x, 2),
+                              math.pow(self.y - other.y, 2),
+                              math.pow(self.z - other.z, 2)]))
 
 if __name__ == '__main__':
     if not os.path.exists(CACHE_DIR):
@@ -65,4 +73,9 @@ if __name__ == '__main__':
         all_systems[system] = coords
 
     print(all_systems)
-    
+
+    direct_path = all_systems[SYSTEMS[0]].distance_to(all_systems[SYSTEMS[-1]])
+    print('Direct path is %s', direct_path)
+
+    simple_path = sum([all_systems[SYSTEMS[i]].distance_to(all_systems[SYSTEMS[i+1]]) for i in range(len(SYSTEMS) - 1)])
+    print('Simple path is %s', simple_path)
