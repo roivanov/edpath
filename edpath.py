@@ -2,28 +2,33 @@
 Find shortest path between two systems while visiting all POI in between
 """
 from __future__ import print_function, unicode_literals
-from collections import namedtuple
-from collections import OrderedDict
-import json
+
 import hashlib
+import json
 import os
-import urllib
-import requests
 import time
+import urllib
+from collections import OrderedDict, namedtuple
+
+import requests
+
+SYSTEMS = ['Great Annihilator', 'STUEMEAE KM-W C1-342']
 
 API_CALL = 'https://www.edsm.net/api-v1/system'
 DELAY = 3
-SYSTEMS = ['Merope']
-DATA = '{"name":"Merope","coords":{"x":-78.59375,"y":-149.625,"z":-340.53125},"coordsLocked":true}'
 CACHE_DIR = '.edpathcache'
 
 class Coords(namedtuple('Coords', 'x y z')):
+    """XYZ coordinates"""
     pass
 
 if __name__ == '__main__':
     if not os.path.exists(CACHE_DIR):
         os.mkdir(CACHE_DIR)
 
+    all_systems = {}
+
+    # load data
     for system in SYSTEMS:
         print(system)
         _hash = hashlib.sha256(system.encode('utf-8')).hexdigest()
@@ -45,10 +50,19 @@ if __name__ == '__main__':
                 with open(fname, 'w') as f:
                     f.write(r.text)
                 data = json.loads(r.text)
+                time.sleep(DELAY)
             else:
                 print('ERROR: status %s is not 200' % r.status_code)
                 raise RuntimeError
 
         print(data)
+        if system.lower() != data.get('name', '').lower() or 'coords' not in data:
+            os.remove(fname)
+            raise RuntimeError('Bad data')
+
         coords = Coords(**data['coords'])
         print(coords)
+        all_systems[system] = coords
+
+    print(all_systems)
+    
