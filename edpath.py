@@ -30,20 +30,21 @@ class System(namedtuple('System', 'name alias')):
     """System we travel"""
     pass
 
+class PathTooLong(Exception):
+    pass
+
 class PathTo(object):
     """Compute path"""
-    def __init__(self, start, finish, poi=None):
+    def __init__(self, start, finish):
         self._start = start
         self._finish = finish
-        # POI
-        self.poi = poi or []
-        self.limit = 0
+        # permutations count
+        self.pcount = 0
 
-    @property
-    def length(self):
-        """Compute distance on the path"""
-        path = [self._start] + self.poi + [self._finish]
-        if self.limit == 0:
+    def length(self, poi, limit=None):
+        """Compute distance on the POI path as it is"""
+        path = [self._start] + poi + [self._finish]
+        if limit is None:
             return sum([path[_i].distance_to(path[_i + 1])
                         for _i in range(len(path) - 1)])
         else:
@@ -52,20 +53,44 @@ class PathTo(object):
             # set limit to start using this branch
             for _i in range(len(path) - 1):
                 ret += path[_i].distance_to(path[_i + 1])
-                if ret > self.limit:
-                    return ret
+                if ret > limit:
+                    raise PathTooLong
 
             return ret
+
+    def best_path(self, poi):
+        """
+        poi - dictionary of all poi on the way
+        """
+        _best_order = None
+        _best_len = None
+        poi_list = poi.keys()
+        # all permutations of poi system names
+        i = self.emit(poi_list)
+        print(i, type(i))
+        for each in i:
+            try:
+                curr_len = self.length(list([poi[x] for x in each]), limit=_best_len)
+                print('Current path is %s', curr_len)
+                if _best_len is None or curr_len < _best_len:
+                    _best_len = curr_len
+                    _best_order = each
+            except PathTooLong:
+                pass
+
+        return _best_len, _best_order
 
     def emit(self, poi):
         """emit all premutations"""
         if len(poi) == 1:
+            self.pcount += 1
             yield poi
         else:
-            for n, elem in enumerate(poi):
-                sub = self.emit(poi[0:n] + poi[n + 1:])
+            for _n, elem in enumerate(poi):
+                sub = self.emit(poi[0:_n] + poi[_n + 1:])
                 try:
                     while True:
+                        self.pcount += 1
                         yield [elem] + sub.next()
                 except StopIteration:
                     pass
@@ -138,37 +163,19 @@ if __name__ == '__main__':
     print('ALL SYSTEMS:')
     print(all_systems)
 
-    # firect path from A to Z
+    # all system names in original order
     original_order = [x.name for x in SYSTEMS]
+    # direct path from A to Z
     mypath = PathTo(all_systems[original_order[0]], all_systems[original_order[-1]])
     print('Direct path is %s', mypath.length)
 
-    # all permutations
-    best_order = None
-    best_len = 0
-    count = 0
-    # permutations count = 362880
-    i = mypath.emit(original_order[1:-1])
-    print(i, type(i))
-    for each in i:
-        count += 1
-        print(each)
-        mypath.poi = list([all_systems[x] for x in each])
-        # set limit
-        if best_len > 0:
-            mypath.limit = best_len
-
-        curr_len = mypath.length
-        print('Current path is %s', curr_len)
-        if best_len == 0 or curr_len < best_len:
-            best_len = curr_len
-            best_order = each
+    best_len, best_order = mypath.best_path({sys: all_systems[sys] for sys in original_order[1:-1]})
 
     print('-' * 60)
     print(best_len)
     print(original_order[0], [aliases[x] for x in best_order], original_order[-1])
-    print(count)
-    assert count in [362880, 3628800], 'troubled permutation'
+    print(mypath.pcount)
+    assert mypath.pcount in [362880, 3628800, 42523300], 'troubled permutation'
 
 # 10487.3914861
 # Great Annihilator [u'Zunuae Nebula',
