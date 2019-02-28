@@ -35,12 +35,25 @@ class PathTo(object):
     """Compute path"""
     def __init__(self, path):
         self._path = path
+        self.limit = 0
 
     @property
     def length(self):
         """Compute distance on the path"""
-        return sum([self._path[_i].distance_to(self._path[_i + 1])
-                    for _i in range(len(self._path) - 1)])
+        if self.limit == 0:
+            return sum([self._path[_i].distance_to(self._path[_i + 1])
+                        for _i in range(len(self._path) - 1)])
+        else:
+            ret = 0
+            # return as soon as sum is above
+            # set limit to start using this branch
+            for _i in range(len(self._path) - 1):
+                ret += self._path[_i].distance_to(self._path[_i + 1])
+                if ret > self.limit:
+                    return ret
+
+            return ret
+
 
 SYSTEMS = [System('Great Annihilator', 'Great Annihilator'),
 
@@ -50,11 +63,12 @@ SYSTEMS = [System('Great Annihilator', 'Great Annihilator'),
            System('Byoomao MI-S e4-5423', 'Wulfric'),
            System('Sagittarius A*', 'Sagittarius A*'),
 
-        #    System('Kyli Flyuae WO-A f39', 'Dance of the Compact Quartet'),
-        #    System('Myriesly DQ-G d10-1240', 'Insinnergy\'s World'),
-        #    System('Myriesly RY-S e3-5414', 'Six Rings'),
-        #    System('Myriesly CL-P e5-4186', 'Emerald Remnant'),
-        #    System('Myriesly CL-P e5-7383', 'Fenrisulfur'),
+           # visiting this system adds another 3k ly to the distance
+           System('Kyli Flyuae WO-A f39', 'Dance of the Compact Quartet'),
+           System('Myriesly DQ-G d10-1240', 'Insinnergy\'s World'),
+           System('Myriesly RY-S e3-5414', 'Six Rings'),
+           System('Myriesly CL-P e5-4186', 'Emerald Remnant'),
+           System('Myriesly CL-P e5-7383', 'Fenrisulfur'),
 
            System('STUEMEAE KM-W C1-342', 'WP7 Altum Sagittarii'),
           ]
@@ -124,6 +138,10 @@ if __name__ == '__main__':
         print(each)
         perm_list = [start_point] + list([all_systems[x] for x in each]) + [final_point]
         curr_path = PathTo(perm_list)
+        # set limit
+        if best_len > 0:
+            curr_path.limit = best_len
+
         curr_len = curr_path.length
         print('Current path is %s', curr_len)
         if best_len == 0 or curr_len < best_len:
@@ -133,3 +151,23 @@ if __name__ == '__main__':
     print('-' * 60)
     print(best_len)
     print(original_order[0], [aliases[x] for x in best_order], original_order[-1])
+
+# 10487.3914861
+# Great Annihilator [u'Zunuae Nebula',
+#                    u'Caeruleum Luna "Mysturji Crater"',
+#                    u'Galionas',
+#                    u'Dance of the Compact Quartet',
+#                    u'Six Rings',
+#                    u'Wulfric',
+#                    u'Emerald Remnant',
+#                    u'Fenrisulfur',
+#                    u"Insinnergy's World",
+#                    u'Sagittarius A*'] STUEMEAE KM-W C1-342
+
+# using sum
+# python edpath.py  130.30s user 0.70s system 99% cpu 2:11.46 total
+# tail  48.58s user 0.63s system 37% cpu 2:11.46 total
+
+# using for loop and eject
+# python edpath.py  105.36s user 0.46s system 99% cpu 1:46.05 total
+# tail  60.99s user 0.67s system 58% cpu 1:46.05 total
