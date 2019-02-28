@@ -3,11 +3,16 @@ Find shortest path between two systems while visiting all POI in between
 """
 from __future__ import print_function, unicode_literals
 from collections import namedtuple
+from collections import OrderedDict
 import json
 import hashlib
 import os
+import urllib
+import requests
+import time
 
-EXAMPLE = 'https://www.edsm.net/api-v1/system?systemName=Merope&showCoordinates=1'
+API_CALL = 'https://www.edsm.net/api-v1/system'
+DELAY = 3
 SYSTEMS = ['Merope']
 DATA = '{"name":"Merope","coords":{"x":-78.59375,"y":-149.625,"z":-340.53125},"coordsLocked":true}'
 CACHE_DIR = '.edpathcache'
@@ -34,9 +39,15 @@ if __name__ == '__main__':
                 data = json.load(f)
         else:
             print('Connecting to EDSM')
-            data = json.loads(DATA)
-            with open(fname, 'w') as f:
-                f.write(DATA)
+            params = OrderedDict([('systemName', system), ('showCoordinates', 1)])
+            r = requests.get(API_CALL, params=urllib.urlencode(params))
+            if r.status_code == 200:
+                with open(fname, 'w') as f:
+                    f.write(r.text)
+                data = json.loads(r.text)
+            else:
+                print('ERROR: status %s is not 200' % r.status_code)
+                raise RuntimeError
 
         print(data)
         coords = Coords(**data['coords'])
