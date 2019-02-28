@@ -7,6 +7,7 @@ import hashlib
 import json
 import math
 import os
+import itertools
 import time
 import urllib
 from collections import OrderedDict, namedtuple
@@ -15,6 +16,7 @@ import requests
 
 SYSTEMS = ['Great Annihilator',
            'Hypoe Flyi HW-W e1-7966',
+           'HYPOE FLYI HX-T E3-295',
            'STUEMEAE KM-W C1-342']
 
 API_CALL = 'https://www.edsm.net/api-v1/system'
@@ -74,8 +76,27 @@ if __name__ == '__main__':
 
     print(all_systems)
 
+    # firect path from A to Z
     direct_path = all_systems[SYSTEMS[0]].distance_to(all_systems[SYSTEMS[-1]])
     print('Direct path is %s', direct_path)
 
-    simple_path = sum([all_systems[SYSTEMS[i]].distance_to(all_systems[SYSTEMS[i+1]]) for i in range(len(SYSTEMS) - 1)])
-    print('Simple path is %s', simple_path)
+    # path in the order of systems
+    best_order = SYSTEMS
+    best_path = sum([all_systems[SYSTEMS[i]].distance_to(all_systems[SYSTEMS[i+1]]) for i in range(len(SYSTEMS) - 1)])
+    print('First path is %s', best_path)
+
+    # all permutations
+    i = itertools.permutations(SYSTEMS[1:-1])
+    for each in i:
+        print(each)
+        perm_list = [SYSTEMS[0]] + list(each) + [SYSTEMS[-1]]
+        print(perm_list)
+        curr_path = sum([all_systems[perm_list[i]].distance_to(all_systems[perm_list[i+1]]) for i in range(len(perm_list) - 1)])
+        print('Current path is %s', curr_path)
+        if curr_path < best_path:
+            best_path = curr_path
+            best_order = perm_list
+    
+    print('-' * 60)
+    print(best_path)
+    print(best_order)
