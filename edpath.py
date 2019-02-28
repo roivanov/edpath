@@ -7,7 +7,6 @@ import hashlib
 import json
 import math
 import os
-import itertools
 import time
 import urllib
 from collections import OrderedDict, namedtuple
@@ -58,6 +57,18 @@ class PathTo(object):
 
             return ret
 
+    def emit(self, poi):
+        """emit all premutations"""
+        if len(poi) == 1:
+            yield poi
+        else:
+            for n, elem in enumerate(poi):
+                sub = self.emit(poi[0:n] + poi[n + 1:])
+                try:
+                    while True:
+                        yield [elem] + sub.next()
+                except StopIteration:
+                    pass
 
 SYSTEMS = [System('Great Annihilator', 'Great Annihilator'),
 
@@ -135,8 +146,12 @@ if __name__ == '__main__':
     # all permutations
     best_order = None
     best_len = 0
-    i = itertools.permutations(original_order[1:-1])
+    count = 0
+    # permutations count = 362880
+    i = mypath.emit(original_order[1:-1])
+    print(i, type(i))
     for each in i:
+        count += 1
         print(each)
         mypath.poi = list([all_systems[x] for x in each])
         # set limit
@@ -152,6 +167,8 @@ if __name__ == '__main__':
     print('-' * 60)
     print(best_len)
     print(original_order[0], [aliases[x] for x in best_order], original_order[-1])
+    print(count)
+    assert count in [362880, 3628800], 'troubled permutation'
 
 # 10487.3914861
 # Great Annihilator [u'Zunuae Nebula',
