@@ -14,8 +14,13 @@ from collections import OrderedDict, namedtuple
 import requests
 
 API_CALL = 'https://www.edsm.net/api-v1/system'
+# be polite, delay in seconds
 DELAY = 3
+
+# cache directory
 CACHE_DIR = '.edpathcache'
+# number of chracters used to build cache tree
+_DIR_CHAR = 2
 
 class Coords(namedtuple('Coords', 'x y z')):
     """XYZ coordinates"""
@@ -68,7 +73,7 @@ class PathTo(object):
         """
         poi - dictionary of system name:coord of all poi on the way
         """
-        _best_order = None
+        _best_order = []
         _best_len = None
         #
         if poi is None:
@@ -122,25 +127,22 @@ SYSTEMS = [System('Great Annihilator', 'Great Annihilator'),
            System('STUEMEAE KM-W C1-342', 'WP7 Altum Sagittarii'),
           ]
 
-if __name__ == '__main__':
-    if not os.path.exists(CACHE_DIR):
-        os.mkdir(CACHE_DIR)
-
+def run_main(syst_list):
     # dictionary of sytem name:system coordinates
     all_systems = {}
     # dictionary of system name:system alias
     aliases = {}
 
     # load data
-    for each in SYSTEMS:
+    for each in syst_list:
         system = each.name
         print(system)
         _hash = hashlib.sha256(system.encode('utf-8')).hexdigest()
-        base_dir = os.path.join(CACHE_DIR, _hash[0])
+        base_dir = os.path.join(CACHE_DIR, _hash[:_DIR_CHAR])
         if not os.path.exists(base_dir):
             os.mkdir(base_dir)
 
-        fname = os.path.join(base_dir, _hash[1:])
+        fname = os.path.join(base_dir, _hash[_DIR_CHAR:])
         print(fname)
         if os.path.exists(fname):
             print('Loading from file')
@@ -173,18 +175,33 @@ if __name__ == '__main__':
     print(all_systems)
 
     # all system names in original order
-    original_order = [x.name for x in SYSTEMS]
+    original_order = [x.name for x in syst_list]
     # direct path from A to Z
     mypath = PathTo(all_systems[original_order[0]], all_systems[original_order[-1]])
     print('Direct path is %s' % mypath.length(poi=None))
 
+    import cProfile, pstats, StringIO
+    pr = cProfile.Profile()
+    pr.enable()
     best_len, best_order = mypath.best_path({sys: all_systems[sys] for sys in original_order[1:-1]})
+    pr.disable()
+    s = StringIO.StringIO()
+    sortby = 'cumulative'
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    ps.print_stats()
+    print(s.getvalue())
 
     print('-' * 60)
     print(best_len)
     print(' > '.join(original_order[:1] + [aliases[x] for x in best_order] + original_order[-2:]))
     print(mypath.pcount)
-    assert mypath.pcount in [362880, 3628800, 42523300, 38894560], 'troubled permutation'
+    # assert mypath.pcount in [362880, 3628800, 42523300, 38894560], 'troubled permutation'
+
+if __name__ == '__main__':
+    if not os.path.exists(CACHE_DIR):
+        os.mkdir(CACHE_DIR)
+    run_main(SYSTEMS)
+
 
 # 10487.3914861
 # Great Annihilator [u'Zunuae Nebula',
