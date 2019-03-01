@@ -44,13 +44,14 @@ class System(Coords):
     if not os.path.exists(CACHE_DIR):
         os.mkdir(CACHE_DIR)
 
-    def __init__(self, name, alias):
+    def __init__(self, name, alias, coords=None):
         self._name = name
         self._alias = alias
-        self._coords = None
-        coords = self._load_coords()
+
+        if coords is None:
+            coords = self._load_coords()
         super(System, self).__init__(coords.x, coords.y, coords.z)
-        print(coords)
+        self.__known_distances = {}
 
     def _load_coords(self):
         _hash = hashlib.sha256(self._name.encode('utf-8')).hexdigest()
@@ -95,6 +96,17 @@ class System(Coords):
     def alias(self):
         return self._alias
 
+    def store_path_to(self, other, value):
+        self.__known_distances[other.name] = value
+
+    def distance_to(self, other):
+        if other.name not in self.__known_distances:
+            l = super(System, self).distance_to(other)
+            self.store_path_to(other, l)
+            other.store_path_to(self, l)
+
+        return self.__known_distances[other.name]
+
 class PathTooLong(Exception):
     pass
 
@@ -135,11 +147,8 @@ class PathTo(object):
         """
         _best_order = []
         _best_len = None
-        #
-        if poi is None:
-            poi = []
         # all permutations of poi systems
-        i = self.emit(poi)
+        i = self.emit(poi or [])
         for each in i:
             try:
                 curr_len = self.length(list(each), limit=_best_len)
@@ -219,3 +228,7 @@ if __name__ == '__main__':
 
 # 229523138 function calls (190628638 primitive calls) in 133.731 seconds
 # 221822632 function calls (182928132 primitive calls) in 114.752 seconds
+# with store len
+# 139839636 function calls (100945136 primitive calls) in 84.637 seconds
+# with store len both ways
+# 139839459 function calls (100944959 primitive calls) in 85.496 seconds

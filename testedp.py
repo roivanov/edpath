@@ -74,7 +74,7 @@ class TestEDPath(unittest.TestCase):
         self.assertAlmostEqual(math.sqrt(99**2+199**2+299**2), a.distance_to(y))
 
         mypath = PathTo(x, y)
-        best_len, best_order = mypath.best_path(poi={'a': a, 'z': z})
+        best_len, best_order = mypath.best_path(poi=[a, z])
         print(best_len, best_order)
         self.assertAlmostEqual(math.sqrt(100+400+900) + 
                                math.sqrt(90**2+180**2+270**2) +
