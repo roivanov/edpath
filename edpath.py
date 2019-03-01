@@ -6,6 +6,7 @@ from __future__ import print_function, unicode_literals
 import hashlib
 import json
 import math
+import random
 import os
 import time
 import urllib
@@ -44,9 +45,9 @@ class System(Coords):
     if not os.path.exists(CACHE_DIR):
         os.mkdir(CACHE_DIR)
 
-    def __init__(self, name, alias, coords=None):
+    def __init__(self, name, alias=None, coords=None):
         self._name = name
-        self._alias = alias
+        self._alias = alias or name
 
         if coords is None:
             coords = self._load_coords()
@@ -60,9 +61,9 @@ class System(Coords):
             os.mkdir(base_dir)
 
         fname = os.path.join(base_dir, _hash[_DIR_CHAR:])
-        print(fname)
+        # print(fname)
         if os.path.exists(fname):
-            print('Loading from file')
+            # print('Loading from file')
             with open(fname) as f:
                 data = json.load(f)
         else:
@@ -78,7 +79,7 @@ class System(Coords):
                 print('ERROR: status %s is not 200' % r.status_code)
                 raise RuntimeError
 
-        print(data)
+        # print(data)
         if self._name.lower() != data.get('name', '').lower() or 'coords' not in data:
             os.remove(fname)
             raise RuntimeError('Bad data')
@@ -90,21 +91,39 @@ class System(Coords):
 
     @property
     def name(self):
+        """Get system name"""
         return self._name
 
     @property
     def alias(self):
+        """Get system alias"""
         return self._alias
 
-    def store_path_to(self, other, value):
+    def store_distance_to(self, other, value):
+        """Cache distance to other system"""
         self.__known_distances[other.name] = value
 
-    def distance_to(self, other):
-        if other.name not in self.__known_distances:
-            l = super(System, self).distance_to(other)
-            self.store_path_to(other, l)
-            other.store_path_to(self, l)
+    def known_distance_to(self, other):
+        """Retrieve distance to other system from cache"""
+        self.__known_distances.get(other.name, None)
 
+    def _distance_to(self, other):
+        ret = super(System, self).distance_to(other)
+        self.store_distance_to(other, ret)
+        return ret
+
+    def distance_to(self, other):
+        """Get distance to other system"""
+        # 426782242 function calls (387887742 primitive calls) in 198.585 seconds
+        # return self.known_distance_to(other) or other.known_distance_to(self) or self._distance_to(other)
+        # 365294359 function calls (326399859 primitive calls) in 177.060 seconds
+        # return self.known_distance_to(other) or self._distance_to(other)
+
+        # 139839636 function calls (100945136 primitive calls) in 79.376 seconds
+        if other.name not in self.__known_distances:
+            ret = super(System, self).distance_to(other)
+            self.__known_distances[other.name] = ret
+        
         return self.__known_distances[other.name]
 
 class PathTooLong(Exception):
@@ -166,6 +185,9 @@ class PathTo(object):
         if len(poi) == 1:
             yield poi
         else:
+            if not self.deep:
+                random.shuffle(poi)
+
             for _n, elem in enumerate(poi):
                 sub = self.emit(poi[0:_n] + poi[_n + 1:])
                 self.deep.append(sub)
@@ -177,16 +199,16 @@ class PathTo(object):
                     pass
                 self.deep.pop()
 
-SYSTEMS = [System('Great Annihilator', 'Great Annihilator'),
+SYSTEMS = [System('Great Annihilator'),
 
+           System('Zunuae HL-Y e6903', 'Zunuae Nebula'),
            System('Hypoe Flyi HW-W e1-7966', 'Galionas'),
            System('HYPOE FLYI HX-T E3-295', 'Caeruleum Luna "Mysturji Crater"'),
-           System('Zunuae HL-Y e6903', 'Zunuae Nebula'),
            System('Byoomao MI-S e4-5423', 'Wulfric'),
-           System('Sagittarius A*', 'Sagittarius A*'),
+           System('Sagittarius A*'),
 
            # visiting this system adds another 3k ly to the distance
-           System('Kyli Flyuae WO-A f39', 'Dance of the Compact Quartet'),
+           System('Kyli Flyuae WO-A f39', '*** Dance of the Compact Quartet'),
            System('Myriesly DQ-G d10-1240', 'Insinnergy\'s World'),
            System('Myriesly RY-S e3-5414', 'Six Rings'),
            System('Myriesly CL-P e5-4186', 'Emerald Remnant'),
@@ -196,12 +218,9 @@ SYSTEMS = [System('Great Annihilator', 'Great Annihilator'),
           ]
 
 def run_main(path):
-    print('ALL SYSTEMS:')
-    print(path)
-
     # direct path from A to Z
     mypath = PathTo(path[0], path[-1])
-    print('Direct path is %s' % mypath.length(poi=None))
+    print('Direct path is %.2f ly' % mypath.length(poi=None))
 
     import cProfile, pstats, StringIO
     pr = cProfile.Profile()
@@ -216,8 +235,13 @@ def run_main(path):
 
     print('-' * 60)
     print(best_len)
-    print(best_order)
-    print(' > '.join([x.alias for x in path[:1] + best_order + path[-2:]]))
+    best_path = path[:1] + best_order + path[-2:]
+    # print(' > '.join([x.alias for x in best_path]))
+    for n, elem in enumerate(best_path):
+        print(' '.join(['  ' * n,
+                        elem.alias,
+                        ' > %.2f ly' % (elem.distance_to(best_path[n + 1])) if n + 1 < len(best_path) else '',
+                        ' >> %.2f ly to last' % (elem.distance_to(best_path[-1]))]))
     print(mypath.pcount)
 
 if __name__ == '__main__':
@@ -232,3 +256,4 @@ if __name__ == '__main__':
 # 139839636 function calls (100945136 primitive calls) in 84.637 seconds
 # with store len both ways
 # 139839459 function calls (100944959 primitive calls) in 85.496 seconds
+# 426782242 function calls (387887742 primitive calls) in 198.585 seconds
