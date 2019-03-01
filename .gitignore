@@ -1,3 +1,5 @@
 .git
 .edpathcache
 .venv
+*.pyc
+
