@@ -9,7 +9,7 @@ import math
 import os
 import time
 import urllib
-from collections import OrderedDict, namedtuple
+from collections import OrderedDict
 
 import requests
 
@@ -22,8 +22,13 @@ CACHE_DIR = '.edpathcache'
 # number of chracters used to build cache tree
 _DIR_CHAR = 2
 
-class Coords(namedtuple('Coords', 'x y z')):
+class Coords(object):
     """XYZ coordinates"""
+    def __init__(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
+
     def distance_to(self, other):
         """compute distance between two points"""
         assert isinstance(other, Coords)
@@ -31,9 +36,64 @@ class Coords(namedtuple('Coords', 'x y z')):
                               math.pow(self.y - other.y, 2),
                               math.pow(self.z - other.z, 2)]))
 
-class System(namedtuple('System', 'name alias')):
+    def __repr__(self):
+        return 'Coords(x={x}, y={y}, z={z})'.format(x=self.x, y=self.y, z=self.z)
+
+class System(Coords):
     """System we travel"""
-    pass
+    if not os.path.exists(CACHE_DIR):
+        os.mkdir(CACHE_DIR)
+
+    def __init__(self, name, alias):
+        self._name = name
+        self._alias = alias
+        self._coords = None
+        coords = self._load_coords()
+        super(System, self).__init__(coords.x, coords.y, coords.z)
+        print(coords)
+
+    def _load_coords(self):
+        _hash = hashlib.sha256(self._name.encode('utf-8')).hexdigest()
+        base_dir = os.path.join(CACHE_DIR, _hash[:_DIR_CHAR])
+        if not os.path.exists(base_dir):
+            os.mkdir(base_dir)
+
+        fname = os.path.join(base_dir, _hash[_DIR_CHAR:])
+        print(fname)
+        if os.path.exists(fname):
+            print('Loading from file')
+            with open(fname) as f:
+                data = json.load(f)
+        else:
+            print('Connecting to EDSM')
+            params = OrderedDict([('systemName', self._name), ('showCoordinates', 1)])
+            r = requests.get(API_CALL, params=urllib.urlencode(params))
+            if r.status_code == 200:
+                with open(fname, 'w') as f:
+                    f.write(r.text)
+                data = json.loads(r.text)
+                time.sleep(DELAY)
+            else:
+                print('ERROR: status %s is not 200' % r.status_code)
+                raise RuntimeError
+
+        print(data)
+        if self._name.lower() != data.get('name', '').lower() or 'coords' not in data:
+            os.remove(fname)
+            raise RuntimeError('Bad data')
+
+        return Coords(**data['coords'])
+
+    def __repr__(self):
+        return 'System(name={name}, {coords})'.format(name=self._name, coords=super(System, self).__repr__())
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def alias(self):
+        return self._alias
 
 class PathTooLong(Exception):
     pass
@@ -78,12 +138,11 @@ class PathTo(object):
         #
         if poi is None:
             poi = []
-        poi_list = poi.keys()
-        # all permutations of poi system names
-        i = self.emit(poi_list)
+        # all permutations of poi systems
+        i = self.emit(poi)
         for each in i:
             try:
-                curr_len = self.length(list([poi[x] for x in each]), limit=_best_len)
+                curr_len = self.length(list(each), limit=_best_len)
                 self.pcount += 1
                 if _best_len is None or curr_len < _best_len:
                     _best_len = curr_len
@@ -127,63 +186,18 @@ SYSTEMS = [System('Great Annihilator', 'Great Annihilator'),
            System('STUEMEAE KM-W C1-342', 'WP7 Altum Sagittarii'),
           ]
 
-def run_main(syst_list):
-    # dictionary of sytem name:system coordinates
-    all_systems = {}
-    # dictionary of system name:system alias
-    aliases = {}
-
-    # load data
-    for each in syst_list:
-        system = each.name
-        print(system)
-        _hash = hashlib.sha256(system.encode('utf-8')).hexdigest()
-        base_dir = os.path.join(CACHE_DIR, _hash[:_DIR_CHAR])
-        if not os.path.exists(base_dir):
-            os.mkdir(base_dir)
-
-        fname = os.path.join(base_dir, _hash[_DIR_CHAR:])
-        print(fname)
-        if os.path.exists(fname):
-            print('Loading from file')
-            with open(fname) as f:
-                data = json.load(f)
-        else:
-            print('Connecting to EDSM')
-            params = OrderedDict([('systemName', system), ('showCoordinates', 1)])
-            r = requests.get(API_CALL, params=urllib.urlencode(params))
-            if r.status_code == 200:
-                with open(fname, 'w') as f:
-                    f.write(r.text)
-                data = json.loads(r.text)
-                time.sleep(DELAY)
-            else:
-                print('ERROR: status %s is not 200' % r.status_code)
-                raise RuntimeError
-
-        print(data)
-        if system.lower() != data.get('name', '').lower() or 'coords' not in data:
-            os.remove(fname)
-            raise RuntimeError('Bad data')
-
-        coords = Coords(**data['coords'])
-        print(coords)
-        all_systems[system] = coords
-        aliases[system] = each.alias
-
+def run_main(path):
     print('ALL SYSTEMS:')
-    print(all_systems)
+    print(path)
 
-    # all system names in original order
-    original_order = [x.name for x in syst_list]
     # direct path from A to Z
-    mypath = PathTo(all_systems[original_order[0]], all_systems[original_order[-1]])
+    mypath = PathTo(path[0], path[-1])
     print('Direct path is %s' % mypath.length(poi=None))
 
     import cProfile, pstats, StringIO
     pr = cProfile.Profile()
     pr.enable()
-    best_len, best_order = mypath.best_path({sys: all_systems[sys] for sys in original_order[1:-1]})
+    best_len, best_order = mypath.best_path(poi=path[1:-1])
     pr.disable()
     s = StringIO.StringIO()
     sortby = 'cumulative'
@@ -193,35 +207,15 @@ def run_main(syst_list):
 
     print('-' * 60)
     print(best_len)
-    print(' > '.join(original_order[:1] + [aliases[x] for x in best_order] + original_order[-2:]))
+    print(best_order)
+    print(' > '.join([x.alias for x in path[:1] + best_order + path[-2:]]))
     print(mypath.pcount)
-    # assert mypath.pcount in [362880, 3628800, 42523300, 38894560], 'troubled permutation'
 
 if __name__ == '__main__':
-    if not os.path.exists(CACHE_DIR):
-        os.mkdir(CACHE_DIR)
     run_main(SYSTEMS)
 
 
-# 10487.3914861
-# Great Annihilator [u'Zunuae Nebula',
-#                    u'Caeruleum Luna "Mysturji Crater"',
-#                    u'Galionas',
-#                    u'Dance of the Compact Quartet',
-#                    u'Six Rings',
-#                    u'Wulfric',
-#                    u'Emerald Remnant',
-#                    u'Fenrisulfur',
-#                    u"Insinnergy's World",
-#                    u'Sagittarius A*'] STUEMEAE KM-W C1-342
+# 10487.3914861 ly
 
-# using sum
-# python edpath.py  130.30s user 0.70s system 99% cpu 2:11.46 total
-# tail  48.58s user 0.63s system 37% cpu 2:11.46 total
-
-# using for loop and eject
-# python edpath.py  105.36s user 0.46s system 99% cpu 1:46.05 total
-# tail  60.99s user 0.67s system 58% cpu 1:46.05 total
-
-# python edpath.py  79.96s user 0.36s system 99% cpu 1:20.48 total
-# tail  46.56s user 0.52s system 58% cpu 1:20.48 total
+# 229523138 function calls (190628638 primitive calls) in 133.731 seconds
+# 221822632 function calls (182928132 primitive calls) in 114.752 seconds
