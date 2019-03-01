@@ -235,6 +235,22 @@ class PathTo(object):
                     pass
                 self.deep.pop()
 
+def wrap_to_profile(func):
+    def _wrap(*args, **kwargs):
+        import cProfile, pstats, StringIO
+        pr = cProfile.Profile()
+        pr.enable()
+        ret = func(*args, **kwargs)
+        pr.disable()
+        s = StringIO.StringIO()
+        sortby = 'cumulative'
+        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+        ps.print_stats()
+        print(s.getvalue())
+
+        return ret
+    return _wrap
+
 SYSTEMS = [System('Great Annihilator'),
 
            System('Zunuae HL-Y e6903', 'Zunuae Nebula'),
@@ -258,16 +274,7 @@ def run_main(path):
     mypath = PathTo(path[0], path[-1])
     print('Direct path is %.2f ly' % mypath.length(poi=None))
 
-    import cProfile, pstats, StringIO
-    pr = cProfile.Profile()
-    pr.enable()
-    best_len, best_order = mypath.best_path(poi=path[1:-1])
-    pr.disable()
-    s = StringIO.StringIO()
-    sortby = 'cumulative'
-    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-    ps.print_stats()
-    print(s.getvalue())
+    best_len, best_order = wrap_to_profile(mypath.best_path)(poi=path[1:-1])
 
     print('-' * 60)
     print(best_len)
