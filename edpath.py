@@ -47,6 +47,8 @@ class PathTo(object):
 
     def length(self, poi, limit=None):
         """Compute distance on the POI path as it is"""
+        if poi is None:
+            poi = []
         path = [self._start] + poi + [self._finish]
         if limit is None:
             return sum([path[_i].distance_to(path[_i + 1])
@@ -69,18 +71,19 @@ class PathTo(object):
         _best_order = None
         _best_len = None
         #
+        if poi is None:
+            poi = []
         poi_list = poi.keys()
         # all permutations of poi system names
         i = self.emit(poi_list)
-        # print(i, type(i))
         for each in i:
             try:
                 curr_len = self.length(list([poi[x] for x in each]), limit=_best_len)
+                self.pcount += 1
                 if _best_len is None or curr_len < _best_len:
                     _best_len = curr_len
                     _best_order = each
             except PathTooLong:
-                # print('killing last ', len(self.deep), self.deep[-1])
                 self.deep[-1] = None
 
         return _best_len, _best_order
@@ -88,32 +91,18 @@ class PathTo(object):
     def emit(self, poi):
         """emit all premutations"""
         if len(poi) == 1:
-            self.pcount += 1
             yield poi
         else:
             for _n, elem in enumerate(poi):
                 sub = self.emit(poi[0:_n] + poi[_n + 1:])
-                # print(_n, elem)
-                # print(' ' * len(self.deep), 'adding to deep', len(self.deep), len(poi) - 1)
                 self.deep.append(sub)
                 my_level = len(self.deep) - 1
-                # print(self.deep)
-                # print(' ' * len(self.deep), 'addeded to deep', len(self.deep))
                 try:
                     while self.deep[my_level] is not None:
-                        # if None in self.deep:
-                        #     print(self.deep[-1] is None)
-                        #     print(self.deep)
-                        #     print(len(self.deep), my_level)
-                        #     if my_level == len(self.deep):
-                        #         raise RuntimeError
-                        self.pcount += 1
                         yield [elem] + sub.next()
                 except StopIteration:
                     pass
-                # print(' ' * len(self.deep), 'popping', len(self.deep))
                 self.deep.pop()
-                # print(' ' * len(self.deep), 'popped', len(self.deep))
 
 SYSTEMS = [System('Great Annihilator', 'Great Annihilator'),
 
@@ -187,7 +176,7 @@ if __name__ == '__main__':
     original_order = [x.name for x in SYSTEMS]
     # direct path from A to Z
     mypath = PathTo(all_systems[original_order[0]], all_systems[original_order[-1]])
-    print('Direct path is %s' % mypath.length)
+    print('Direct path is %s' % mypath.length(poi=None))
 
     best_len, best_order = mypath.best_path({sys: all_systems[sys] for sys in original_order[1:-1]})
 
