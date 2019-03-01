@@ -20,6 +20,8 @@ API_CALL = 'https://www.edsm.net/api-v1/system'
 DELAY = 3
 
 class FileCache(object):
+    """File Cache of the objects or data"""
+
     # cache directory
     CACHE_DIR = '.edpathcache'
     # number of chracters used to build cache tree
@@ -41,11 +43,11 @@ class FileCache(object):
             os.mkdir(base_dir)
 
         return os.path.join(base_dir, _hash[FileCache._DIR_CHAR:])
-    
+
     @property
     def fname(self):
         return self.__fname
-    
+
     @fname.setter
     def fname(self, value):
         self.__fname = FileCache.set_fname(value)
@@ -66,7 +68,7 @@ class FileCache(object):
     def remove(self):
         os.remove(self.fname)
 
-    
+
 class Coords(object):
     """XYZ coordinates"""
     def __init__(self, x, y, z):
@@ -157,7 +159,7 @@ class System(Coords, FileCache):
         if other.name not in self.__known_distances:
             ret = super(System, self).distance_to(other)
             self.__known_distances[other.name] = ret
-        
+
         return self.__known_distances[other.name]
 
 class PathTooLong(Exception):
@@ -270,12 +272,27 @@ def run_main(path):
     print('-' * 60)
     print(best_len)
     best_path = path[:1] + best_order + path[-2:]
-    # print(' > '.join([x.alias for x in best_path]))
-    for n, elem in enumerate(best_path):
-        print(' '.join(['  ' * n,
-                        elem.alias,
-                        ' > %.2f ly' % (elem.distance_to(best_path[n + 1])) if n + 1 < len(best_path) else '',
-                        ' >> %.2f ly to last' % (elem.distance_to(best_path[-1]))]))
+
+    i = iter(best_path)
+    curr = None
+    nxt = i.next()
+    n = 0
+    while nxt:
+        try:
+            curr = nxt
+            nxt = i.next()
+        except StopIteration:
+            nxt = None
+
+        to_last = PathTo(curr, best_path[-1])
+        print('  ' * n,
+              curr.alias,
+              ' > %.2f ly to next' % curr.distance_to(nxt or curr),
+              ' >> %.2f ly to last by poi' % to_last.length(poi=best_path[n+1:-1]),
+              ' >>> %.2f ly to last directly' % to_last.length(poi=[]),
+              )
+        n += 1
+
     print(mypath.pcount)
 
 if __name__ == '__main__':
