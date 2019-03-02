@@ -69,7 +69,7 @@ def run_main(path):
               )
         n += 1
 
-    print(mypath.pcount)
+    print(mypath.pcount, mypath.rcount)
 
 if __name__ == '__main__':
     run_main(SYSTEMS)

@@ -16,16 +16,18 @@ class PathTo(object):
         self._finish = finish
         # permutations count
         self.pcount = 0
+        # raise count
+        self.rcount = 0
 
         # how deep to cancel
         self.deep = []
 
-    def length(self, poi, limit=None):
+    def length(self, poi, limit=0):
         """Compute distance on the POI path as it is"""
         if poi is None:
             poi = []
         path = [self._start] + poi + [self._finish]
-        if limit is None:
+        if limit == 0:
             return sum([path[_i].distance_to(path[_i + 1])
                         for _i in range(len(path) - 1)])
         else:
@@ -44,17 +46,18 @@ class PathTo(object):
         poi - dictionary of system name:coord of all poi on the way
         """
         _best_order = []
-        _best_len = None
+        _best_len = 0
         # all permutations of poi systems
         i = self.emit(poi or [])
         for each in i:
             try:
-                curr_len = self.length(list(each), limit=_best_len)
                 self.pcount += 1
-                if _best_len is None or curr_len < _best_len:
+                curr_len = self.length(list(each), limit=_best_len)
+                if _best_len == 0 or curr_len < _best_len:
                     _best_len = curr_len
                     _best_order = each
             except PathTooLong:
+                self.rcount += 1
                 self.deep[-1] = None
 
         return _best_len, _best_order
@@ -72,6 +75,7 @@ class PathTo(object):
                 self.deep.append(sub)
                 my_level = len(self.deep) - 1
                 try:
+                    # while True:
                     while self.deep[my_level] is not None:
                         yield [elem] + sub.next()
                 except StopIteration:
