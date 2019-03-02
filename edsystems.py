@@ -86,23 +86,25 @@ class System(Coords, FileCache):
 
     def known_distance_to(self, other):
         """Retrieve distance to other system from cache"""
-        self.__known_distances.get(other.name, None)
+        return self.__known_distances.get(other.name, None)
 
     def _distance_to(self, other):
         ret = super(System, self).distance_to(other)
         self.store_distance_to(other, ret)
+        # this will double memory footprint
+        other.store_distance_to(self, ret)
         return ret
 
     def distance_to(self, other):
         """Get distance to other system"""
         # 426782242 function calls (387887742 primitive calls) in 198.585 seconds
-        # return self.known_distance_to(other) or other.known_distance_to(self) or self._distance_to(other)
+        return self.known_distance_to(other) or other.known_distance_to(self) or self._distance_to(other)
         # 365294359 function calls (326399859 primitive calls) in 177.060 seconds
         # return self.known_distance_to(other) or self._distance_to(other)
 
         # 139839636 function calls (100945136 primitive calls) in 79.376 seconds
-        if other.name not in self.__known_distances:
-            ret = super(System, self).distance_to(other)
-            self.__known_distances[other.name] = ret
+        # if other.name not in self.__known_distances:
+        #     ret = super(System, self).distance_to(other)
+        #     self.__known_distances[other.name] = ret
 
-        return self.__known_distances[other.name]
+        # return self.__known_distances[other.name]

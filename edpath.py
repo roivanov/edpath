@@ -72,10 +72,9 @@ class PathTo(object):
 
             for _n, elem in enumerate(poi):
                 sub = self.emit(poi[0:_n] + poi[_n + 1:])
+                my_level = len(self.deep)
                 self.deep.append(sub)
-                my_level = len(self.deep) - 1
                 try:
-                    # while True:
                     while self.deep[my_level] is not None:
                         yield [elem] + sub.next()
                 except StopIteration:
