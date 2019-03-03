@@ -1,6 +1,13 @@
-import unittest
+# pylint: disable=missing-docstring
+from __future__ import print_function
+
+import copy
 import math
-from edpath import Coords, PathTo
+import unittest
+
+from edpath import PathTo
+from edsystems import Coords
+
 
 class TestEDPath(unittest.TestCase):
     def test_distance(self):
@@ -82,3 +89,30 @@ class TestEDPath(unittest.TestCase):
                                best_len)
         
         self.assertEqual(2, mypath.pcount)
+
+    def test_fast_tree(self):
+        arr = [1, 2, 3, 4]
+        amap = list(range(len(arr)))
+        dest = copy.copy(arr)
+
+        """
+        (1, 2, 3, 4)
+        (1, 2, 4, 3)
+        (1, 3, 2, 4)
+        (1, 3, 4, 2)
+        """
+        print(arr)
+        print(dest)
+        i = len(dest) - 1
+        dest[i], dest[i-1] = dest[i-1], dest[i]
+        print(dest)
+
+        print(amap)
+        from itertools import permutations
+        perm = permutations(arr)
+        print(perm)
+        # for each in perm:
+            # print(each)
+
+        self.assertSetEqual(set(arr), set(dest), 'Lost some values')
+        self.assertEqual(1, 1)

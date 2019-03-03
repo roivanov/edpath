@@ -70,8 +70,20 @@ class PathTo(object):
             if not self.deep:
                 random.shuffle(poi)
 
-            for _n, elem in enumerate(poi):
-                sub = self.emit(poi[0:_n] + poi[_n + 1:])
+            # + elem
+            # |   + arr
+            # 0   1 2 3 4
+            # 0 + 1 2 3 4
+            # 1 + 0 2 3 4
+            # 2 + 0 1 3 4
+            # 3 + 0 1 2 4
+            # 4 + 0 1 2 3 ** no need to swap here
+            elem = poi[0]
+            arr = poi[1:]
+            for indx in range(len(poi)):
+                # indx is a position to insert value back into arr
+                # nval is the next value to pickup
+                sub = self.emit(arr)
                 my_level = len(self.deep)
                 self.deep.append(sub)
                 try:
@@ -80,3 +92,7 @@ class PathTo(object):
                 except StopIteration:
                     pass
                 self.deep.pop()
+                assert my_level == len(self.deep)
+
+                if indx < len(arr):
+                    arr[indx], elem = elem, arr[indx]
