@@ -60,10 +60,13 @@ class System(Coords, FileCache):
                     print('ERROR: status %s is not 200' % r.status_code)
                     raise RuntimeError
 
-        # print(data)
-        if self._name.lower() != data.get('name', '').lower() or 'coords' not in data:
+        try:
+            if self._name.lower() != data.get('name', '').lower() or 'coords' not in data:
+                raise RuntimeError('Bad data')
+        except AttributeError:
+            print(data)
             self.remove()
-            raise RuntimeError('Bad data')
+            raise
 
         return Coords(**data['coords'])
 
@@ -97,14 +100,4 @@ class System(Coords, FileCache):
 
     def distance_to(self, other):
         """Get distance to other system"""
-        # 426782242 function calls (387887742 primitive calls) in 198.585 seconds
         return self.known_distance_to(other) or other.known_distance_to(self) or self._distance_to(other)
-        # 365294359 function calls (326399859 primitive calls) in 177.060 seconds
-        # return self.known_distance_to(other) or self._distance_to(other)
-
-        # 139839636 function calls (100945136 primitive calls) in 79.376 seconds
-        # if other.name not in self.__known_distances:
-        #     ret = super(System, self).distance_to(other)
-        #     self.__known_distances[other.name] = ret
-
-        # return self.__known_distances[other.name]

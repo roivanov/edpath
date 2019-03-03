@@ -1,8 +1,8 @@
 """main code"""
 from __future__ import print_function, unicode_literals
 
+import config
 from edpath import PathTo
-from edsystems import System
 
 def wrap_to_profile(func):
     def _wrap(*args, **kwargs):
@@ -19,24 +19,6 @@ def wrap_to_profile(func):
 
         return ret
     return _wrap
-
-SYSTEMS = [System('Great Annihilator'),
-
-           System('Zunuae HL-Y e6903', 'Zunuae Nebula'),
-           System('Hypoe Flyi HW-W e1-7966', 'Galionas'),
-           System('HYPOE FLYI HX-T E3-295', 'Caeruleum Luna "Mysturji Crater"'),
-           System('Byoomao MI-S e4-5423', 'Wulfric'),
-           System('Sagittarius A*'),
-
-           # visiting this system adds another 3k ly to the distance
-           System('Kyli Flyuae WO-A f39', '*** Dance of the Compact Quartet'),
-           System('Myriesly DQ-G d10-1240', 'Insinnergy\'s World'),
-           System('Myriesly RY-S e3-5414', 'Six Rings'),
-           System('Myriesly CL-P e5-4186', 'Emerald Remnant'),
-           System('Myriesly CL-P e5-7383', 'Fenrisulfur'),
-
-           System('STUEMEAE KM-W C1-342', 'WP7 Altum Sagittarii'),
-          ]
 
 def run_main(path):
     # direct path from A to Z
@@ -72,7 +54,7 @@ def run_main(path):
     print(mypath.pcount, mypath.rcount)
 
 if __name__ == '__main__':
-    run_main(SYSTEMS)
+    run_main(config.WP6TO7H2)
 
 
 # 10487.3914861 ly
