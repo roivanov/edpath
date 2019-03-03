@@ -51,8 +51,8 @@ class PathTo(object):
         i = self.emit(poi or [])
         for each in i:
             try:
-                self.pcount += 1
                 curr_len = self.length(list(each), limit=_best_len)
+                self.pcount += 1
                 if _best_len == 0 or curr_len < _best_len:
                     _best_len = curr_len
                     _best_order = each
@@ -64,7 +64,9 @@ class PathTo(object):
 
     def emit(self, poi):
         """emit all premutations"""
-        if len(poi) == 1:
+        if not poi:
+            pass
+        elif len(poi) == 1:
             yield poi
         else:
             if not self.deep:

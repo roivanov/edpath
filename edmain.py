@@ -1,6 +1,8 @@
 """main code"""
 from __future__ import print_function, unicode_literals
 
+import math
+
 import config
 from edpath import PathTo
 
@@ -29,7 +31,7 @@ def run_main(path):
 
     print('-' * 60)
     print(best_len)
-    best_path = path[:1] + best_order + path[-2:]
+    best_path = path[:1] + best_order + path[-1:]
 
     i = iter(best_path)
     curr = None
@@ -51,10 +53,11 @@ def run_main(path):
               )
         n += 1
 
-    print(mypath.pcount, mypath.rcount)
+    print('Paths considered: %d, paths rejected early %d' % (mypath.pcount, mypath.rcount))
+    print('Paths not even considered: %d' % (math.factorial(len(path) - mypath.rcount - mypath.pcount)))
 
 if __name__ == '__main__':
-    run_main(config.WP6TO7H2)
+    run_main(config.WP6TO7)
 
 
 # 10487.3914861 ly
