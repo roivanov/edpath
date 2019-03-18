@@ -54,10 +54,10 @@ def run_main(path):
         n += 1
 
     print('Paths considered: %d, paths rejected early %d' % (mypath.pcount, mypath.rcount))
-    print('Paths not even considered: %d' % (math.factorial(len(path) - mypath.rcount - mypath.pcount)))
+    print('Paths not even considered: %d' % (math.factorial(len(path)) - mypath.rcount - mypath.pcount))
 
 if __name__ == '__main__':
-    run_main(config.WP6TO7)
+    run_main(config.WP7TO8)
 
 
 # 10487.3914861 ly
