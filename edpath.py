@@ -3,6 +3,7 @@ Find shortest path between two systems while visiting all POI in between
 """
 from __future__ import print_function, unicode_literals
 
+import math
 import random
 
 class PathTooLong(Exception):
@@ -98,3 +99,49 @@ class PathTo(object):
 
                 if indx < len(arr):
                     arr[indx], elem = elem, arr[indx]
+
+class Distance(object):
+    """
+    D1: A->B->C->D->Z
+    D2:    B->C->D->Z or
+           B->D->C->Z
+    D3:       C->D->Z
+    D4:          D->Z
+    """
+    def __init__(self, dist):
+        self.start = dist[0]
+        self.finish = dist[-1]
+        self.poi = dist[1:-1][:1]
+
+        self.fact = math.factorial(len(self.poi))
+        self.pcount = 0
+        self.rcount = 0
+
+    @property
+    def direct_length(self):
+        return self.length(poi=None)
+
+    def best_path(self, limit=0):
+        if len(self.poi) < 2:
+            return self.length(self.poi), [self.start ] + self.poi + [self.finish]
+        else:
+            raise NotImplementedError('Too many poi')
+
+    def length(self, poi, limit=0):
+        """Compute distance on the POI path as it is"""
+        if poi is None:
+            poi = []
+        path = [self.start] + poi + [self.finish]
+        if limit == 0:
+            return sum([path[_i].distance_to(path[_i + 1])
+                        for _i in range(len(path) - 1)])
+        else:
+            ret = 0
+            # return as soon as sum is above
+            # set limit to start using this branch
+            for _i in range(len(path) - 1):
+                ret += path[_i].distance_to(path[_i + 1])
+                if ret > limit:
+                    raise PathTooLong
+
+            return ret
