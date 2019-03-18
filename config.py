@@ -1,6 +1,6 @@
 # pylint: disable=missing-docstring
 
-from edsystems import System
+from edsystems import System, Coords
 
 WP6TO7 = [System('Great Annihilator'),
 
@@ -41,13 +41,13 @@ WP7TO8 = [#System('Sagittarius A*'),
           #System('Phua Aub MX-U e2-7396', 'Phua Aub Archer Epsilon'),
           #System('Phua Aub SJ-R e4-8234', 'Phua Aub Archer Kappa'),
           #2
-          System('Phipoea WK-E d12-1374', 'Crown Of Ice'),
-          System('Phipoea HJ-D c27-5254', 'Silver Highway'),
+          System('Phipoea WK-E d12-1374', '1 Crown Of Ice'),
+          System('Phipoea HJ-D c27-5254', '2 Silver Highway'),
           #3
-          System('Rothaei SI-B e2047', 'Dark Eye Nebula'),
+          System('Rothaei SI-B e2047', '3 Dark Eye Nebula'),
           #4&5
-          System('Braisio FR-V e2-293', 'Braisio Juliet Nebula Cluster'),
-          System('Rhuedgie KN-T e3-721', 'Breakthrough Echoes'),
+          System('Braisio FR-V e2-293', '4 Braisio Juliet Nebula Cluster'),
+          System('Rhuedgie KN-T e3-721', '5 Breakthrough Echoes'),
 
           #Minor POI
           #System('Juenae OX-U e2-8852', '_ Hengist Nebula'),
@@ -60,4 +60,8 @@ WP7TO8 = [#System('Sagittarius A*'),
 
           # FINISH at
           System('Swoals IL-Y e0', 'Goliath\'s Rest')
+]
+
+TEST = [System('A', coords=Coords(0, 0, 0)),
+        System('Z', coords=Coords(1000, 1000, 1000))
 ]

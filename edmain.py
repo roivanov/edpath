@@ -25,10 +25,10 @@ def wrap_to_profile(func):
 
 def run_main(path):
     # direct path from A to Z
-    mypath = Distance(path)
+    mypath = Distance(path[:5])
     print('Direct path is %.2f ly' % mypath.direct_length)
 
-    best_len, best_path = wrap_to_profile(mypath.best_path)()
+    best_len, best_path = mypath.best_path()
 
     print('-' * 60)
     print(best_len)
@@ -49,8 +49,8 @@ def run_main(path):
         print('  ' * n,
               curr.alias,
               ' > %.2f ly to next' % curr.distance_to(nxt or curr),
-              ' >> %.2f ly to last by poi' % to_last.length(poi=best_path[n+1:-1]),
-              ' >>> %.2f ly to last directly' % to_last.length(poi=[]),
+              # ' >> %.2f ly to last by poi' % to_last.length(poi=best_path[n+1:-1]),
+              # ' >>> %.2f ly to last directly' % to_last.length(poi=[]),
               )
         n += 1
 
@@ -58,7 +58,7 @@ def run_main(path):
     print('Paths not even considered: %d' % (mypath.fact - mypath.rcount - mypath.pcount))
 
 if __name__ == '__main__':
-    run_main(config.WP7TO8)
+    run_main(config.TEST)
 
 """
 12025.0323703
