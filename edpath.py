@@ -7,6 +7,8 @@ import copy
 import math
 import random
 
+DEBUG = False
+
 class Distance(object):
     """
     D1: A->B->C->D->Z
@@ -28,6 +30,10 @@ class Distance(object):
         self.rcount = 0
 
         self.level = ''
+
+    def print(self, *args):
+        if DEBUG:
+            self.print(self.level, *args)
 
     @property
     def fact(self):
@@ -60,52 +66,52 @@ class Distance(object):
             first_path.append(self.path[_i].distance_to(self.path[_i + 1]))
 
         assert len(self.path) - len(first_path) == 1
-        print(self.level, 'First path:', self.path)
-        print(self.level, 'First path len:', first_path)
+        self.print('First path:', self.path)
+        self.print('First path len:', first_path)
 
         if limit == 0:
             limit = sum(first_path)
 
         # if no poi
         if len(self.poi) < 2:
-            print(self.level, 'short path, returning')
+            self.print('short path, returning')
             return sum(first_path), self.path
         else:
             # for every poi
             best_path = copy.copy(self.path[1:])
             found_best = copy.copy(self.path)
             found_len = sum(first_path)
-            print(self.level, 'starting best path # of poi:', len(best_path))
+            self.print('starting best path # of poi:', len(best_path))
 
             # try all combinations (exclude finish)
             for indx in range(len(best_path) - 1):
                 elem = best_path[0]
-                print(self.level, 'indx', indx, elem)
+                self.print('indx', indx, elem)
                 # next distance on this path (excluding self.start)
                 # print(best_path)
 
                 first_jump = self.start.distance_to(elem)
                 next_limit = limit - first_jump
-                print(self.level, 'first jump', first_jump, elem, 'next limit', next_limit)
+                self.print('first jump', first_jump, elem, 'next limit', next_limit)
 
                 if next_limit > 0:
-                    print(self.level, 'going sub path')
+                    self.print('going sub path')
                     subdistance = Distance(best_path)
                     subdistance.level = self.level + '  '
                     sub_best_len, sub_best_path = subdistance.best_path(next_limit)
 
                     if first_jump + sub_best_len < limit:
-                        print(self.level, 'path looks like shorter' , self.start, sub_best_path)
+                        self.print('path looks like shorter' , self.start, sub_best_path)
                         limit = first_jump + sub_best_len
                         found_len = limit
                         found_best = copy.copy([self.start] + sub_best_path)
                     else:
-                        print(self.level, 'path is not shorter')
+                        self.print('path is not shorter')
 
                 if indx < len(best_path) - 1:
                     best_path[0], best_path[indx + 1] = best_path[indx + 1], best_path[0]
             
-            print('BP:', found_len, found_best)
+            self.print('BP:', found_len, found_best)
             # assert len(best_path) == len(self.poi), len(self.poi)
             # assert best_path is not None
 
