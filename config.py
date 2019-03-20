@@ -42,7 +42,7 @@ WP7TO8 = [System('Sagittarius A*'),
           System('Phua Aub SJ-R e4-8234', 'Phua Aub Archer Kappa'),
           #2
           System('Phipoea WK-E d12-1374', 'Crown Of Ice'),
-          System('Phipoea HJ-D c27-5254', 'Silver Highway'),
+          System('Phipoea HJ-D c27-5254', '* Silver Highway'),
           #3
           System('Rothaei SI-B e2047', 'Dark Eye Nebula'),
           #4&5
@@ -55,8 +55,8 @@ WP7TO8 = [System('Sagittarius A*'),
           System('Eok Bluae GX-K d8-1521', '_ Karkina Nebula'),
           System('G2 Dust Cloud Sector JH-V c2-2851', '_ G2 Dust Cloud'),
           System('Dryau Chrea DB-F d11-3866', '_ Stairway To Heaven'),
-        #   System('Eorl Broae EB-O e6-1507', '_ Black Giants Nebula'),
-        #   System('Lyaisae HA-A e3363', '_ Lyaisae Juliet Nebula Cluster'),
+          System('Eorl Broae EB-O e6-1507', '_ Black Giants Nebula'),
+          System('Lyaisae HA-A e3363', '_ Lyaisae Juliet Nebula Cluster'),
 
           # FINISH at
           System('Swoals IL-Y e0', 'Goliath\'s Rest')
