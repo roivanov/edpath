@@ -50,11 +50,11 @@ WP7TO8 = [System('Sagittarius A*'),
           System('Rhuedgie KN-T e3-721', 'Breakthrough Echoes'),
 
           #Minor POI
-        #   System('Juenae OX-U e2-8852', '_ Hengist Nebula'),
-        #   System('GRS 1739-278', '_ GRS 1739-278'),
-        #   System('Eok Bluae GX-K d8-1521', '_ Karkina Nebula'),
-        #   System('G2 Dust Cloud Sector JH-V c2-2851', '_ G2 Dust Cloud'),
-        #   System('Dryau Chrea DB-F d11-3866', '_ Stairway To Heaven'),
+          System('Juenae OX-U e2-8852', '_ Hengist Nebula'),
+          System('GRS 1739-278', '_ GRS 1739-278'),
+          System('Eok Bluae GX-K d8-1521', '_ Karkina Nebula'),
+          System('G2 Dust Cloud Sector JH-V c2-2851', '_ G2 Dust Cloud'),
+          System('Dryau Chrea DB-F d11-3866', '_ Stairway To Heaven'),
         #   System('Eorl Broae EB-O e6-1507', '_ Black Giants Nebula'),
         #   System('Lyaisae HA-A e3363', '_ Lyaisae Juliet Nebula Cluster'),
 
