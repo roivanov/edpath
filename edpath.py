@@ -39,6 +39,23 @@ class Distance(object):
         if DEBUG:
             self.print(self.level, *args)
 
+    @staticmethod
+    def print_path(best_len, best_path):
+        print('-' * 60)
+        print(best_len)
+
+        for n, curr in enumerate(best_path):
+            if n < len(best_path) - 1:
+                to_last = Distance(best_path[n:])
+                print('  ' * n,
+                    curr.alias,
+                    ' > %.2f ly to next' % curr.distance_to(best_path[n + 1]),
+                    ' >> %.2f ly to last by poi' % to_last.len_path_asis,
+                    ' >>> %.2f ly to last directly' % to_last.direct_length,
+                    )
+            else:
+                print('  ' * n, curr.alias)
+
     def print_stats(self):
         print('Total %d! combinations' % (len(self.path) - 2))
         print('Paths considered: %d, paths rejected early %d' % (self.pcount, self.rcount))

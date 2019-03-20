@@ -1,8 +1,6 @@
 """main code"""
 from __future__ import print_function, unicode_literals
 
-import math
-
 import config
 from edpath import Distance
 
@@ -28,22 +26,7 @@ def run_main(path):
     mypath = Distance(path)
     print('Direct path is %.2f ly' % mypath.direct_length)
 
-    best_len, best_path = mypath.best_path()
-
-    print('-' * 60)
-    print(best_len)
-
-    for n, curr in enumerate(best_path):
-        if n < len(best_path) - 1:
-            to_last = Distance(best_path[n:])
-            print('  ' * n,
-                  curr.alias,
-                  ' > %.2f ly to next' % curr.distance_to(best_path[n + 1]),
-                  ' >> %.2f ly to last by poi' % to_last.len_path_asis,
-                  ' >>> %.2f ly to last directly' % to_last.direct_length,
-                 )
-        else:
-            print('  ' * n, curr.alias)
+    mypath.print_path(*mypath.best_path())
 
     mypath.print_stats()
 
