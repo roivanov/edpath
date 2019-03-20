@@ -106,6 +106,7 @@ class Distance(object):
                     sub_best_len, sub_best_path = subdistance.best_path(next_limit)
 
                     self.pcount += subdistance.pcount
+                    self.rcount += subdistance.rcount
 
                     if first_jump + sub_best_len < limit:
                         self.print('path looks like shorter' , self.start, sub_best_path)
@@ -114,6 +115,9 @@ class Distance(object):
                         found_best = copy.copy([self.start] + sub_best_path)
                     else:
                         self.print('path is not shorter')
+                else:
+                    # reject all sub path when first jump is too long (minus start, finish, elem)
+                    self.rcount += math.factorial(len(self.path) - 3)
 
                 if indx < len(best_path) - 1:
                     best_path[0], best_path[indx + 1] = best_path[indx + 1], best_path[0]
