@@ -47,9 +47,9 @@ def run_main(path):
             print('  ' * n, curr.alias)
 
     print('Paths considered: %d, paths rejected early %d' % (mypath.pcount, mypath.rcount))
-    fv, fr = mypath.fact
-    print('Total %d! combinations' % fv)
-    print('Paths not even considered: %d' % (fr - mypath.rcount - mypath.pcount))
+    total = mypath.fact
+    print('Paths not even considered: %d of %d' % (total - mypath.rcount - mypath.pcount, total))
+    print('Optmizitaion %.1f (more is better)' % (100.0 * mypath.rcount / total))
 
 if __name__ == '__main__':
     run_main(config.WP7TO8)

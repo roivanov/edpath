@@ -41,7 +41,8 @@ class Distance(object):
 
     @property
     def fact(self):
-        return len(self.path) - 2, math.factorial(len(self.path) - 2)
+        self.print('Total %d! combinations' % (len(self.path) - 2))
+        return math.factorial(len(self.path) - 2)
 
     @property
     def start(self):
