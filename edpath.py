@@ -39,10 +39,12 @@ class Distance(object):
         if DEBUG:
             self.print(self.level, *args)
 
-    @property
-    def fact(self):
+    def print_stats(self):
         print('Total %d! combinations' % (len(self.path) - 2))
-        return math.factorial(len(self.path) - 2)
+        print('Paths considered: %d, paths rejected early %d' % (self.pcount, self.rcount))
+        total = math.factorial(len(self.path) - 2)
+        print('Paths not even considered: %d of %d' % (total - self.rcount - self.pcount, total))
+        print('Optmizitaion %.1f (more is better)' % (100.0 * self.rcount / total))
 
     @property
     def start(self):
