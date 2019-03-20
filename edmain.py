@@ -34,25 +34,17 @@ def run_main(path):
     print(best_len)
     print(best_path)
 
-    i = iter(best_path)
-    curr = None
-    nxt = i.next()
-    n = 0
-    while nxt:
-        try:
-            curr = nxt
-            nxt = i.next()
-        except StopIteration:
-            nxt = None
-
-        to_last = Distance([curr, best_path[-1]])
-        print('  ' * n,
-              curr.alias,
-              ' > %.2f ly to next' % curr.distance_to(nxt or curr),
-              # ' >> %.2f ly to last by poi' % to_last.length(poi=best_path[n+1:-1]),
-              # ' >>> %.2f ly to last directly' % to_last.length(poi=[]),
-              )
-        n += 1
+    for n, curr in enumerate(best_path):
+        if n < len(best_path) - 1:
+            to_last = Distance(best_path[n:])
+            print('  ' * n,
+                  curr.alias,
+                  ' > %.2f ly to next' % curr.distance_to(best_path[n + 1]),
+                  ' >> %.2f ly to last by poi' % to_last.len_path_asis,
+                  ' >>> %.2f ly to last directly' % to_last.direct_length,
+                 )
+        else:
+            print('  ' * n, curr.alias)
 
     print('Paths considered: %d, paths rejected early %d' % (mypath.pcount, mypath.rcount))
     print('Paths not even considered: %d' % (mypath.fact - mypath.rcount - mypath.pcount))

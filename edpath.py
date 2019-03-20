@@ -55,32 +55,32 @@ class Distance(object):
     def direct_length(self):
         return self.start.distance_to(self.finish)
 
+    @property
+    def len_path_asis(self):
+        ret = 0
+        for _i in range(len(self.path) - 1):
+            ret += self.path[_i].distance_to(self.path[_i + 1])
+        
+        return ret
+
     def best_path(self, limit=0):
         # find first path A->..->Z
-        # import pdb
-        # pdb.set_trace()
-        # first unoptimised path
-        first_path = []
-        # FIXME can use sub path
-        for _i in range(len(self.path) - 1):
-            first_path.append(self.path[_i].distance_to(self.path[_i + 1]))
 
-        assert len(self.path) - len(first_path) == 1
-        self.print('First path:', self.path)
+        first_path = self.len_path_asis
         self.print('First path len:', first_path)
 
         if limit == 0:
-            limit = sum(first_path)
+            limit = first_path
 
         # if no poi
         if len(self.poi) < 2:
             self.print('short path, returning')
-            return sum(first_path), self.path
+            return first_path, self.path
         else:
             # for every poi
             best_path = copy.copy(self.path[1:])
             found_best = copy.copy(self.path)
-            found_len = sum(first_path)
+            found_len = first_path
             self.print('starting best path # of poi:', len(best_path))
 
             # try all combinations (exclude finish)
