@@ -63,5 +63,7 @@ WP7TO8 = [#System('Sagittarius A*'),
 ]
 
 TEST = [System('A', coords=Coords(0, 0, 0)),
-        System('Z', coords=Coords(1000, 1000, 1000))
+        System('B', coords=Coords(100, 0, 0)),
+        System('C', coords=Coords(150, 0, 0)),
+        System('Z', coords=Coords(1000, 0, 0))
 ]
