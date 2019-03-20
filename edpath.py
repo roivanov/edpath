@@ -73,8 +73,8 @@ class Distance(object):
         else:
             # for every poi
             best_path = copy.copy(self.path[1:])
-            found_best = None
-            found_len = None
+            found_best = copy.copy(self.path)
+            found_len = sum(first_path)
             print(self.level, 'starting best path # of poi:', len(best_path))
 
             # try all combinations (exclude finish)
@@ -95,10 +95,10 @@ class Distance(object):
                     sub_best_len, sub_best_path = subdistance.best_path(next_limit)
 
                     if first_jump + sub_best_len < limit:
-                        print(self.level, 'path looks like shorter')
+                        print(self.level, 'path looks like shorter' , self.start, sub_best_path)
                         limit = first_jump + sub_best_len
                         found_len = limit
-                        found_best = sub_best_path
+                        found_best = copy.copy([self.start] + sub_best_path)
                     else:
                         print(self.level, 'path is not shorter')
 
@@ -109,4 +109,4 @@ class Distance(object):
             # assert len(best_path) == len(self.poi), len(self.poi)
             # assert best_path is not None
 
-            return found_len, [self.start] + found_best
+            return found_len, found_best

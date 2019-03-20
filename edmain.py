@@ -25,7 +25,7 @@ def wrap_to_profile(func):
 
 def run_main(path):
     # direct path from A to Z
-    mypath = Distance(path[:5])
+    mypath = Distance(path)
     print('Direct path is %.2f ly' % mypath.direct_length)
 
     best_len, best_path = mypath.best_path()
@@ -58,7 +58,7 @@ def run_main(path):
     print('Paths not even considered: %d' % (mypath.fact - mypath.rcount - mypath.pcount))
 
 if __name__ == '__main__':
-    run_main(config.TEST)
+    run_main(config.WP7TO8)
 
 """
 12025.0323703
