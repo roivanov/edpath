@@ -19,6 +19,7 @@ class Distance(object):
     D3:       C->D->Z
     D4:          D->Z
     """
+
     def __init__(self, dist):
         if len(dist) < 2:
             raise ValueError('distance must be two or more poi')
@@ -26,7 +27,10 @@ class Distance(object):
         # full path as it comes in
         self.path = copy.copy(dist)
 
+        # path counted until the end
         self.pcount = 0
+
+        # path rejected early
         self.rcount = 0
 
         self.level = ''
@@ -37,7 +41,7 @@ class Distance(object):
 
     @property
     def fact(self):
-        return math.factorial(len(self.path) - 2)
+        return len(self.path) - 2, math.factorial(len(self.path) - 2)
 
     @property
     def start(self):
@@ -74,6 +78,7 @@ class Distance(object):
 
         # if no poi
         if len(self.poi) < 2:
+            self.pcount += 1
             self.print('short path, returning')
             return first_path, self.path
         else:
@@ -99,6 +104,8 @@ class Distance(object):
                     subdistance = Distance(best_path)
                     subdistance.level = self.level + '  '
                     sub_best_len, sub_best_path = subdistance.best_path(next_limit)
+
+                    self.pcount += subdistance.pcount
 
                     if first_jump + sub_best_len < limit:
                         self.print('path looks like shorter' , self.start, sub_best_path)
