@@ -2,12 +2,13 @@
 Find shortest path between two systems while visiting all POI in between
 """
 from __future__ import print_function, unicode_literals
-from collections import namedtuple
-from edsystems import mSystem
 
 import copy
 import math
 import random
+from collections import namedtuple
+
+from edsystems import mSystem
 
 DEBUG = False
 
@@ -81,7 +82,6 @@ class Distance(object):
     def print_stats(self):
         print('Total %d! combinations' % (len(self.path) - 2))
         print('Paths considered: %d, paths rejected early %d' % (self.pcount, self.rcount))
-        # this is untrue for skip minor
         total = math.factorial(self.poi_len)
         print('Paths not even considered: %d of %d' % (total - self.rcount - self.pcount, total))
         print('Optmizitaion %.1f (more is better)' % (100.0 * self.rcount / total))
