@@ -47,7 +47,7 @@ WP7TO8 = [System('Sagittarius A*'),
           #2
           System('Phipoea WK-E d12-1374', 'Crown Of Ice'),
           System('Phipoea HJ-D c27-5254', 'Silver Highway'),
-          mSystem('Eok Bluae GX-K d8-1521', '* Karkina Nebula'),
+          mSystem('Eok Bluae GX-K d8-1521', 'Karkina Nebula'),
           #3
           System('Rothaei SI-B e2047', 'Dark Eye Nebula'),
           #4&5
@@ -55,7 +55,7 @@ WP7TO8 = [System('Sagittarius A*'),
           System('Rhuedgie KN-T e3-721', 'Breakthrough Echoes'),
 
           #Minor POI
-          mSystem('Dryau Chrea DB-F d11-3866', 'Stairway To Heaven'),
+          mSystem('Dryau Chrea DB-F d11-3866', '* Stairway To Heaven'),
           mSystem('Eorl Broae EB-O e6-1507', 'Black Giants Nebula'),
           mSystem('Lyaisae HA-A e3363', 'Lyaisae Juliet Nebula Cluster'),
 

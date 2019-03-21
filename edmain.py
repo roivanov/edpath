@@ -21,14 +21,12 @@ def wrap_to_profile(func):
         return ret
     return _wrap
 
-def run_main(path):
+if __name__ == '__main__':
     # direct path from A to Z
-    mypath = Distance(path)
+    mypath = Distance(config.WP7TO8[10:])
     print('Direct path is %.2f ly' % mypath.direct_length)
 
     mypath.print_path(*mypath.best_path())
 
     mypath.print_stats()
-
-if __name__ == '__main__':
-    run_main(config.WP7TO8[9:])
+    
