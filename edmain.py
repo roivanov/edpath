@@ -23,9 +23,9 @@ def wrap_to_profile(func):
 
 if __name__ == '__main__':
     # direct path from A to Z
-    mypath = Distance(config.WP7TO8)
+    mypath = Distance(config.WP7TO8[10:])
     print('Direct path is %.2f ly' % mypath.direct_length)
 
-    mypath.print_path(wrap_to_profile(mypath.best_path)(skip_minor=True)[-1])
+    mypath.print_path(wrap_to_profile(mypath.best_path)(skip_minor=False)[-1])
 
     mypath.print_stats()

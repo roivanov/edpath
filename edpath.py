@@ -29,6 +29,11 @@ class Distance(object):
 
         # full path as it comes in
         self.path = copy.copy(dist)
+        # swap: system marked with * is the real start
+        for indx, elem in enumerate(self.path):
+            if '*' in elem.alias:
+                self.path[0], self.path[indx] = self.path[indx], self.path[0]
+                break
 
         # path counted until the end
         self.pcount = 0
@@ -80,7 +85,7 @@ class Distance(object):
             print(s)
 
     def print_stats(self):
-        print('Total %d! combinations' % (len(self.path) - 2))
+        print('Total %d! combinations' % self.poi_len)
         print('Paths considered: %d, paths rejected early %d' % (self.pcount, self.rcount))
         total = math.factorial(self.poi_len)
         print('Paths not even considered: %d of %d' % (total - self.rcount - self.pcount, total))
