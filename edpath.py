@@ -3,6 +3,7 @@ Find shortest path between two systems while visiting all POI in between
 """
 from __future__ import print_function, unicode_literals
 from collections import namedtuple
+from edsystems import mSystem
 
 import copy
 import math
@@ -44,7 +45,7 @@ class Distance(object):
     def print_path(best_path):
         COLS = ('Name', 'Next', 'Path', 'Last')
         Table = namedtuple('Table', COLS)
-        Table.__new__.__defaults__ = ('',) * len(COLS)
+        Table.__new__.__defaults__ = ('-',) * len(COLS)
 
         table = [Table(*COLS)]
 
@@ -74,7 +75,6 @@ class Distance(object):
             for indx, elem in enumerate(each):
                 s += ' %s |' %elem.center(tlen[indx])
             print(s)
-
 
     def print_stats(self):
         print('Total %d! combinations' % (len(self.path) - 2))
@@ -107,7 +107,7 @@ class Distance(object):
         
         return ret
 
-    def best_path(self, limit=0):
+    def best_path(self, limit=0, skip_minor=False):
         # find first path A->..->Z
 
         first_path = self.len_path_asis
@@ -123,8 +123,12 @@ class Distance(object):
             return first_path, self.path
         else:
             # for every poi
-            best_path = copy.copy(self.path[1:])
-            found_best = copy.copy(self.path)
+            if skip_minor:
+                found_best = copy.copy([x for x in self.path if not isinstance(x, mSystem)])
+            else:
+                found_best = copy.copy(self.path)
+
+            best_path = copy.copy(found_best[1:])
             found_len = first_path
             self.print('starting best path # of poi:', len(best_path))
 
