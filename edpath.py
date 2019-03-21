@@ -2,6 +2,7 @@
 Find shortest path between two systems while visiting all POI in between
 """
 from __future__ import print_function, unicode_literals
+from collections import namedtuple
 
 import copy
 import math
@@ -40,21 +41,40 @@ class Distance(object):
             self.print(self.level, *args)
 
     @staticmethod
-    def print_path(best_len, best_path):
-        print('-' * 60)
-        print(best_len)
+    def print_path(best_path):
+        COLS = ('Name', 'Next', 'Path', 'Last')
+        Table = namedtuple('Table', COLS)
+        Table.__new__.__defaults__ = ('',) * len(COLS)
+
+        table = [Table(*COLS)]
 
         for n, curr in enumerate(best_path):
             if n < len(best_path) - 1:
                 to_last = Distance(best_path[n:])
-                print('  ' * n,
-                    curr.alias,
-                    ' > %.2f ly to next' % curr.distance_to(best_path[n + 1]),
-                    ' >> %.2f ly to last by poi' % to_last.len_path_asis,
-                    ' >>> %.2f ly to last directly' % to_last.direct_length,
-                    )
+                table.append(Table(curr.alias,
+                                   '{: 5.2f} ly'.format(curr.distance_to(best_path[n + 1])),
+                                   '{: 5.2f} ly'.format(to_last.len_path_asis),
+                                   '{: 5.2f} ly'.format(to_last.direct_length)
+                                   ))
             else:
-                print('  ' * n, curr.alias)
+                table.append(Table(curr.alias))
+        
+        tlen = [0] * len(COLS)
+        for each in table:
+            for indx, elem in enumerate(each):
+                tlen[indx] = max(tlen[indx], len(elem))
+
+        sep = ['-' * each for each in tlen]
+        table.append(sep)
+        table.insert(0, sep)
+        table.insert(2, sep)
+
+        for each in table:
+            s = '| '
+            for indx, elem in enumerate(each):
+                s += ' %s |' %elem.center(tlen[indx])
+            print(s)
+
 
     def print_stats(self):
         print('Total %d! combinations' % (len(self.path) - 2))
