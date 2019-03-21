@@ -35,11 +35,13 @@ class Distance(object):
         # path rejected early
         self.rcount = 0
 
-        self.level = ''
+        self.level = 0
+        # we need this value for the case when we skip minor poi
+        self.poi_len = len(self.path) - 2
 
     def print(self, *args):
         if DEBUG:
-            self.print(self.level, *args)
+            self.print('' * self.level, *args)
 
     @staticmethod
     def print_path(best_path):
@@ -79,7 +81,8 @@ class Distance(object):
     def print_stats(self):
         print('Total %d! combinations' % (len(self.path) - 2))
         print('Paths considered: %d, paths rejected early %d' % (self.pcount, self.rcount))
-        total = math.factorial(len(self.path) - 2)
+        # this is untrue for skip minor
+        total = math.factorial(self.poi_len)
         print('Paths not even considered: %d of %d' % (total - self.rcount - self.pcount, total))
         print('Optmizitaion %.1f (more is better)' % (100.0 * self.rcount / total))
 
@@ -123,10 +126,15 @@ class Distance(object):
             return first_path, self.path
         else:
             # for every poi
+            tpath = self.path[1:-1]
             if skip_minor:
-                found_best = copy.copy([x for x in self.path if not isinstance(x, mSystem)])
-            else:
-                found_best = copy.copy(self.path)
+                tpath = [x for x in tpath if not isinstance(x, mSystem)]
+                self.poi_len = len(tpath)
+            
+            if self.level == 0:
+                random.shuffle(tpath)
+            
+            found_best = [self.path[0]] + tpath + [self.path[-1]]
 
             best_path = copy.copy(found_best[1:])
             found_len = first_path
@@ -146,7 +154,7 @@ class Distance(object):
                 if next_limit > 0:
                     self.print('going sub path')
                     subdistance = Distance(best_path)
-                    subdistance.level = self.level + '  '
+                    subdistance.level = self.level + 2
                     sub_best_len, sub_best_path = subdistance.best_path(next_limit)
 
                     self.pcount += subdistance.pcount
