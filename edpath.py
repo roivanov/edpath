@@ -62,7 +62,7 @@ class Distance(object):
                                    ))
             else:
                 table.append(Table(curr.alias))
-        
+
         tlen = [0] * len(COLS)
         for each in table:
             for indx, elem in enumerate(each):
@@ -107,7 +107,7 @@ class Distance(object):
         ret = 0
         for _i in range(len(self.path) - 1):
             ret += self.path[_i].distance_to(self.path[_i + 1])
-        
+
         return ret
 
     def best_path(self, limit=0, skip_minor=False):
@@ -130,10 +130,10 @@ class Distance(object):
             if skip_minor:
                 tpath = [x for x in tpath if not isinstance(x, mSystem)]
                 self.poi_len = len(tpath)
-            
+
             if self.level == 0:
                 random.shuffle(tpath)
-            
+
             found_best = [self.path[0]] + tpath + [self.path[-1]]
 
             best_path = copy.copy(found_best[1:])
@@ -161,7 +161,7 @@ class Distance(object):
                     self.rcount += subdistance.rcount
 
                     if first_jump + sub_best_len < limit:
-                        self.print('path looks like shorter' , self.start, sub_best_path)
+                        self.print('path looks like shorter', self.start, sub_best_path)
                         limit = first_jump + sub_best_len
                         found_len = limit
                         found_best = copy.copy([self.start] + sub_best_path)
@@ -173,7 +173,7 @@ class Distance(object):
 
                 if indx < len(best_path) - 1:
                     best_path[0], best_path[indx + 1] = best_path[indx + 1], best_path[0]
-            
+
             self.print('BP:', found_len, found_best)
             # assert len(best_path) == len(self.poi), len(self.poi)
             # assert best_path is not None
