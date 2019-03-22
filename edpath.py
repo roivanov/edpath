@@ -30,10 +30,10 @@ class Distance(object):
         # full path as it comes in
         self.path = copy.copy(dist)
         # swap: system marked with * is the real start
-        for indx, elem in enumerate(self.path):
-            if '*' in elem.alias:
-                self.path[0], self.path[indx] = self.path[indx], self.path[0]
-                break
+        # for indx, elem in enumerate(self.path):
+        #     if '*' in elem.alias:
+        #         # self.path[0], self.path[indx] = self.path[indx], self.path[0]
+        #         break
 
         # path counted until the end
         self.pcount = 0
@@ -136,8 +136,8 @@ class Distance(object):
                 tpath = [x for x in tpath if not isinstance(x, mSystem)]
                 self.poi_len = len(tpath)
 
-            if self.level == 0:
-                random.shuffle(tpath)
+            # if self.level == 0:
+            #     random.shuffle(tpath)
 
             found_best = [self.path[0]] + tpath + [self.path[-1]]
 
@@ -184,3 +184,13 @@ class Distance(object):
             # assert best_path is not None
 
             return found_len, found_best
+
+    def scale(self):
+        ret = {}
+        for each in self.path[1:-1]:
+            a, b = self.start.distance_to(each), self.finish.distance_to(each)
+            scale = a / (a + b)
+            ret[scale] = each
+
+        ret = [ret[k] for k in sorted(ret.keys())]
+        return ret
