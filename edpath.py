@@ -109,16 +109,16 @@ class Distance(object):
 
     @property
     def len_path_asis(self):
-        ret = 0
-        for _i in range(len(self.path) - 1):
-            ret += self.path[_i].distance_to(self.path[_i + 1])
+        return Distance.__get_length(self.path)
 
-        return ret
+    @staticmethod
+    def __get_length(path):
+        return sum([path[_i].distance_to(path[_i + 1]) for _i in range(len(path) - 1)])
 
     def best_path(self, limit=0, skip_minor=False):
         # find first path A->..->Z
 
-        first_path = self.len_path_asis
+        first_path = Distance.__get_length(self.path)
         self.print('First path len:', first_path)
 
         if limit == 0:
@@ -194,3 +194,25 @@ class Distance(object):
 
         ret = [ret[k] for k in sorted(ret.keys())]
         return ret
+
+    def best_path_with_split(self, skip_minor=False):
+        scaled = self.scale()
+        middle = len(scaled) / 2
+
+        best_l = 0
+        best_best = None
+        for n in range(-1, 2):
+            p_one = Distance([self.start] + scaled[:middle + n +1])
+            path_one = p_one.best_path(skip_minor=skip_minor)[-1]
+            p_two = Distance(scaled[middle + n:] + [self.finish])
+            path_two = p_two.best_path(skip_minor=skip_minor)[-1]
+            assert path_one[-1] == path_two[0]
+
+            test_path = path_one + path_two[1:]
+            l = Distance.__get_length(test_path)
+            if best_l == 0 or l < best_l:
+                best_l = l
+                best_best = copy.copy(test_path)
+                print(n, l, path_two[0].alias, len(path_one), len(path_two))
+        
+        return best_l, best_best

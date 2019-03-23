@@ -51,14 +51,15 @@ WP7TO8 = [System('Sagittarius A*'),
           #3
           System('Rothaei SI-B e2047', 'Dark Eye Nebula'),
           #4&5
-          System('Braisio FR-V e2-293', 'Braisio Juliet Nebula Cluster'),
+          System('Braisio FR-V e2-293', '* Braisio Juliet Nebula Cluster'),
           System('Rhuedgie KN-T e3-721', 'Breakthrough Echoes'),
 
           #Minor POI
-          mSystem('Dryau Chrea DB-F d11-3866', '* Stairway To Heaven'),
+          mSystem('Dryau Chrea DB-F d11-3866', 'Stairway To Heaven'),
           mSystem('Eorl Broae EB-O e6-1507', 'Black Giants Nebula'),
           mSystem('Lyaisae HA-A e3363', 'Lyaisae Juliet Nebula Cluster'),
 
+          mSystem('Hypiae Phyloi LR-C D22'),
           # FINISH at
           System('Swoals IL-Y e0', 'Goliath\'s Rest')
 ]
