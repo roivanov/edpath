@@ -39,14 +39,18 @@ class Distance(object):
                         arr.reverse()
                     else:
                         arr = [x.strip() for x in each.split('/', 2)]
+                    
+                    # add as mSystem when name or alias starts or ends with _
+                    s = System
+                    for indx, elem in enumerate(arr):
+                        if elem[0] == '_' or elem[-1] == '_':
+                            s = mSystem
+                            arr[indx] = elem.strip('_ ')
 
                     if len(arr) == 1 or arr[0] == arr[1]:
-                        new_dist.append(System(name=arr[0]))
-                    elif arr[1][0] == '_':
-                        # we can also do arr.append(arr[0])
-                        new_dist.append(mSystem(name=arr[0], alias=arr[1]))
+                        new_dist.append(s(name=arr[0]))
                     else:
-                        new_dist.append(System(name=arr[0], alias=arr[1]))
+                        new_dist.append(s(name=arr[0], alias=arr[1]))
             dist = new_dist
         else:
             raise ValueError('Unsupported type')

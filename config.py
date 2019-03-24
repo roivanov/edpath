@@ -76,12 +76,10 @@ TEST = [System('A', coords=Coords(0, 0, 0)),
 WP7TO8TXT = """
 Sagittarius A*
 # Major POI
-#1/1,2,3
 Phua Aub Archer Beta - GalMap Ref: Phua Aub VY-S e3-3899
 Phua Aub Archer Epsilon - GalMap Ref: Phua Aub MX-U e2-7396
 Phua Aub Archer Kappa - GalMap Ref: Phua Aub SJ-R e4-8234
 
-#2
 Crown Of Ice - GalMap Ref: Phipoea WK-E d12-1374
 Silver Highway - GalMap Ref: Phipoea HJ-D c27-5254
 Dark Eye Nebula - GalMap Ref: Rothaei SI-B e2047
@@ -89,13 +87,13 @@ Braisio Juliet Nebula Cluster – GalMap Ref: Braisio FR-V e2-293
 Breakthrough Echoes - GalMap Ref: Rhuedgie KN-T e3-721
 
 #Minor POI
-Juenae OX-U e2-8852/_Hengist Nebula
-GRS 1739-278/_GRS 1739-278
-Eok Bluae GX-K d8-1521/_Karkina Nebula
-G2 Dust Cloud Sector JH-V c2-2851/_G2 Dust Cloud
-Dryau Chrea DB-F d11-3866/_Stairway To Heaven
-Eorl Broae EB-O e6-1507/_Black Giants Nebula
-Lyaisae HA-A e3363/_Lyaisae Juliet Nebula Cluster
+Hengist Nebula - GalMap Ref: Juenae OX-U e2-8852_
+GRS 1739-278 - GalMap Ref: GRS 1739-278_
+Karkina Nebula - GalMap Ref: Eok Bluae GX-K d8-1521_
+G2 Dust Cloud - GalMap Ref: G2 Dust Cloud Sector JH-V c2-2851_
+Stairway To Heaven - GalMap Ref: Dryau Chrea DB-F d11-3866 _
+Black Giants Nebula - GalMap Ref: Eorl Broae EB-O e6-1507_
+Lyaisae Juliet Nebula Cluster - GalMap Ref: Lyaisae HA-A e3363_
 
 Hypiae Phyloi LR-C D22
 # FINISH at
