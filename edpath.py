@@ -245,7 +245,8 @@ class Distance(object):
 
         best_l = 0
         best_best = None
-        for n in range(-1, 2):
+        N = 3
+        for n in range(-N, N + 1):
             p_one = Distance([self.start] + scaled[:middle + n +1])
             p_two = Distance(scaled[middle + n:] + [self.finish])
             if THREADS:

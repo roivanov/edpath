@@ -101,7 +101,8 @@ Swoals IL-Y e0/Goliath's Rest
 """
 
 WP8TO9TXT = """
-# ADD starting point
+# START at
+Swoals IL-Y e0/Goliath's Rest
 
 # MAJOR POI
 Iris' Missive - GalMap Ref: Lasoae BF-A f810
@@ -110,10 +111,10 @@ Forgotten Twins Nebula - GalMap Ref: Brairee KD-S e4-2776
 Dances with Giants - GalMap Ref: Hypoe Bluae VP-O e6-8688
 
 # Minor POI
-The Remnants Trio - GalMap Ref: Schee Bli AA-A h300
-Gaesous Twins - GalMap Ref: Braisoea UQ-C d13-6108
-Arach Nebula - GalMap Ref: Lyaisae PJ-Y c14-472
-Hot Temptation - GalMap Ref: Phroea Bli BW-V e2-10185
+The Remnants Trio - GalMap Ref: Schee Bli AA-A h300_
+Gaesous Twins - GalMap Ref: Braisoea UQ-C d13-6108_
+Arach Nebula - GalMap Ref: Lyaisae PJ-Y c14-472_
+Hot Temptation - GalMap Ref: Phroea Bli BW-V e2-10185_
 
 # FINISH at
 Cerulean Tranquility - GalMap Ref: Phroi Bluae QI-T e3-3454
