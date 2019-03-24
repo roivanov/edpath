@@ -51,7 +51,7 @@ WP7TO8 = [System('Sagittarius A*'),
           #3
           System('Rothaei SI-B e2047', 'Dark Eye Nebula'),
           #4&5
-          System('Braisio FR-V e2-293', '* Braisio Juliet Nebula Cluster'),
+          System('Braisio FR-V e2-293', 'Braisio Juliet Nebula Cluster'),
           System('Rhuedgie KN-T e3-721', 'Breakthrough Echoes'),
 
           #Minor POI

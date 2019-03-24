@@ -136,8 +136,8 @@ class Distance(object):
                 tpath = [x for x in tpath if not isinstance(x, mSystem)]
                 self.poi_len = len(tpath)
 
-            # if self.level == 0:
-            #     random.shuffle(tpath)
+            if self.level == 0:
+                random.shuffle(tpath)
 
             found_best = [self.path[0]] + tpath + [self.path[-1]]
 

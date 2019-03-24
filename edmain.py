@@ -1,8 +1,6 @@
 """main code"""
 from __future__ import print_function, unicode_literals
 
-import copy
-
 import config
 
 from edpath import Distance
