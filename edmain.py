@@ -3,7 +3,6 @@ main code
 
 TODO prespawn and keep threads running
 TODO remove duplicated in systems (this disables returning to poi)
-TODO cache poi computed best path: sort poi, create checksum, save best path
 """
 
 from __future__ import print_function, unicode_literals

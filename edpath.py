@@ -15,7 +15,7 @@ from edsystems import System, mSystem
 from filecache import FileCache
 
 DEBUG = False
-THREADS = False
+THREADS = True
 
 class _T_Distance(threading.Thread):
     def __init__(self, dist):
@@ -185,20 +185,26 @@ class Distance(FileCache):
         else:
             with self.open() as f:
                 if f:
-                    data = json.load(f)
-                    found_len = data['found_len']
-                    found_best = []
-                    for each in data['found_best']:
-                        system = [x for x in self.path if x.name == each]
-                        assert len(system) == 1, each
-                        found_best.append(system[0])
+                    return self.from_dict(json.load(f))
                 else:
                     found_len, found_best = self._best_path(first_path, limit, skip_minor)
-                    data = {'found_len': found_len,
-                            'found_best': [x.name for x in found_best]}
-                    self.save(json.dumps(data))
+                    self.save(json.dumps(self.to_dict(found_len, found_best)))
 
-                return found_len, found_best
+                    return found_len, found_best
+
+    def from_dict(self, data):
+        found_len = data['found_len']
+        found_best = []
+        for each in data['found_best']:
+            system = [x for x in self.path if x.name == each]
+            assert len(system) == 1, each
+            found_best.append(system[0])
+
+        return found_len, found_best
+
+    def to_dict(self, path_len, path):
+        return {'found_len': path_len,
+                'found_best': [x.name for x in path]}
 
     def _best_path(self, first_path, limit, skip_minor):
         # for every poi
@@ -267,36 +273,42 @@ class Distance(FileCache):
         return ret
 
     def best_path_with_split(self, skip_minor=False):
-        scaled = self.scale()
-        middle = len(scaled) / 2
-
-        best_l = 0
-        best_best = None
-        # FIXME N might need better logic
-        N = min(3, middle)
-        for n in range(-N, N + 1):
-            p_one = Distance([self.start] + scaled[:middle + n +1])
-            p_two = Distance(scaled[middle + n:] + [self.finish])
-            if THREADS:
-                t_one = _T_Distance(p_one)
-                t_two = _T_Distance(p_two)
-                t_one.start()
-                t_two.start()
-                t_one.join()
-                t_two.join()
-                path_one = t_one.best[-1]
-                path_two = t_two.best[-1]
+        with self.open() as f:
+            if f:
+                return self.from_dict(json.load(f))
             else:
-                path_one = p_one.best_path(skip_minor=skip_minor)[-1]
-                path_two = p_two.best_path(skip_minor=skip_minor)[-1]
+                scaled = self.scale()
+                middle = len(scaled) / 2
 
-            assert path_one[-1] == path_two[0]
+                best_l = 0
+                best_best = None
+                # FIXME N might need better logic
+                N = min(3, middle)
+                for n in range(-N, N + 1):
+                    p_one = Distance([self.start] + scaled[:middle + n +1])
+                    p_two = Distance(scaled[middle + n:] + [self.finish])
+                    if THREADS:
+                        t_one = _T_Distance(p_one)
+                        t_two = _T_Distance(p_two)
+                        t_one.start()
+                        t_two.start()
+                        t_one.join()
+                        t_two.join()
+                        path_one = t_one.best[-1]
+                        path_two = t_two.best[-1]
+                    else:
+                        path_one = p_one.best_path(skip_minor=skip_minor)[-1]
+                        path_two = p_two.best_path(skip_minor=skip_minor)[-1]
 
-            test_path = path_one + path_two[1:]
-            l = Distance.__get_length(test_path)
-            if best_l == 0 or l < best_l:
-                best_l = l
-                best_best = copy.copy(test_path)
-                print(n, l, path_two[0].alias, len(path_one), len(path_two))
-        
-        return best_l, best_best
+                    assert path_one[-1] == path_two[0]
+
+                    test_path = path_one + path_two[1:]
+                    l = Distance.__get_length(test_path)
+                    if best_l == 0 or l < best_l:
+                        best_l = l
+                        best_best = copy.copy(test_path)
+                        print(n, l, path_two[0].alias, len(path_one), len(path_two))
+                
+                self.save(json.dumps(self.to_dict(best_l, best_best)))
+
+                return best_l, best_best
