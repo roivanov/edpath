@@ -8,7 +8,7 @@ import math
 import random
 from collections import namedtuple
 
-from edsystems import mSystem
+from edsystems import System, mSystem
 
 DEBUG = False
 
@@ -24,6 +24,25 @@ class Distance(object):
     """
 
     def __init__(self, dist):
+        if isinstance(dist, list):
+            pass
+        elif isinstance(dist, str):
+            new_dist = []
+            for each in dist.splitlines():
+                each = each.strip()
+                if each and each[0] != '#':
+                    arr = each.split('/', 2)
+                    if len(arr) == 1 or arr[0] == arr[1]:
+                        new_dist.append(System(name=arr[0]))
+                    elif arr[1][0] == '_':
+                        # we can also do arr.append(arr[0])
+                        new_dist.append(mSystem(name=arr[0], alias=arr[1]))
+                    else:
+                        new_dist.append(System(name=arr[0], alias=arr[1]))
+            dist = new_dist
+        else:
+            raise ValueError('Unsupported type')
+
         if len(dist) < 2:
             raise ValueError('distance must be two or more poi')
 

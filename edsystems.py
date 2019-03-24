@@ -103,7 +103,8 @@ class System(Coords, FileCache):
         return self.known_distance_to(other) or other.known_distance_to(self) or self._distance_to(other)
 
 class mSystem(System):
-    @property
-    def alias(self):
-        """Get system alias"""
-        return '_' + super(mSystem, self).alias
+    pass
+    # @property
+    # def alias(self):
+    #     """Get system alias"""
+    #     return super(mSystem, self).alias

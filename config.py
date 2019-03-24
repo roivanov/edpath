@@ -71,3 +71,34 @@ TEST = [System('A', coords=Coords(0, 0, 0)),
         System('D', coords=Coords(200, 0, 0)),
         System('Z', coords=Coords(1000, 0, 0))
 ]
+
+WP7TO8TXT = """
+Sagittarius A*
+# Major POI
+#1/1,2,3
+Phua Aub VY-S e3-3899/Phua Aub Archer Beta
+Phua Aub MX-U e2-7396/Phua Aub Archer Epsilon
+Phua Aub SJ-R e4-8234/Phua Aub Archer Kappa
+
+#2
+Phipoea WK-E d12-1374/Crown Of Ice
+Phipoea HJ-D c27-5254/Silver Highway
+#3
+Rothaei SI-B e2047/Dark Eye Nebula [*]
+#4&5
+Braisio FR-V e2-293/Braisio Juliet Nebula Cluster
+Rhuedgie KN-T e3-721/Breakthrough Echoes
+
+#Minor POI
+Juenae OX-U e2-8852/_Hengist Nebula
+GRS 1739-278/_GRS 1739-278
+Eok Bluae GX-K d8-1521/_Karkina Nebula
+G2 Dust Cloud Sector JH-V c2-2851/_G2 Dust Cloud
+Dryau Chrea DB-F d11-3866/_Stairway To Heaven
+Eorl Broae EB-O e6-1507/_Black Giants Nebula
+Lyaisae HA-A e3363/_Lyaisae Juliet Nebula Cluster
+
+Hypiae Phyloi LR-C D22
+# FINISH at
+Swoals IL-Y e0/Goliath's Rest
+"""
