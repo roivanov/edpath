@@ -5,15 +5,17 @@ Find shortest path between two systems while visiting all POI in between
 from __future__ import print_function, unicode_literals
 
 import copy
+import json
 import math
 import random
 import threading
 from collections import namedtuple
 
 from edsystems import System, mSystem
+from filecache import FileCache
 
 DEBUG = False
-THREADS = True
+THREADS = False
 
 class _T_Distance(threading.Thread):
     def __init__(self, dist):
@@ -26,7 +28,7 @@ class _T_Distance(threading.Thread):
         self.best = self._dist.best_path()
 
 
-class Distance(object):
+class Distance(FileCache):
     """
     D1: A->B->C->D->Z
         +--+          first jump
@@ -78,6 +80,13 @@ class Distance(object):
         #     if '*' in elem.alias:
         #         # self.path[0], self.path[indx] = self.path[indx], self.path[0]
         #         break
+
+        # set file cache
+        if len(self.poi) > 6:
+            arr = [self.start.name] + sorted([each.name for each in self.poi]) + [self.finish.name]
+            self.fname = ';'.join(arr)
+        else:
+            self.fname = None
 
         # path counted until the end
         self.pcount = 0
@@ -174,60 +183,78 @@ class Distance(object):
             self.print('short path, returning')
             return first_path, self.path
         else:
-            # for every poi
-            tpath = self.path[1:-1]
-            if skip_minor:
-                tpath = [x for x in tpath if not isinstance(x, mSystem)]
-                self.poi_len = len(tpath)
-
-            if self.level == 0:
-                random.shuffle(tpath)
-
-            found_best = [self.path[0]] + tpath + [self.path[-1]]
-
-            best_path = copy.copy(found_best[1:])
-            found_len = first_path
-            self.print('starting best path # of poi:', len(best_path))
-
-            # try all combinations (exclude finish)
-            for indx in range(len(best_path) - 1):
-                elem = best_path[0]
-                self.print('indx', indx, elem)
-                # next distance on this path (excluding self.start)
-                # print(best_path)
-
-                first_jump = self.start.distance_to(elem)
-                next_limit = limit - first_jump
-                self.print('first jump', first_jump, elem, 'next limit', next_limit)
-
-                if next_limit > 0:
-                    self.print('going sub path')
-                    subdistance = Distance(best_path)
-                    subdistance.level = self.level + 2
-                    sub_best_len, sub_best_path = subdistance.best_path(next_limit)
-
-                    self.pcount += subdistance.pcount
-                    self.rcount += subdistance.rcount
-
-                    if first_jump + sub_best_len < limit:
-                        self.print('path looks like shorter', self.start, sub_best_path)
-                        limit = first_jump + sub_best_len
-                        found_len = limit
-                        found_best = copy.copy([self.start] + sub_best_path)
-                    else:
-                        self.print('path is not shorter')
+            with self.open() as f:
+                if f:
+                    data = json.load(f)
+                    found_len = data['found_len']
+                    found_best = []
+                    for each in data['found_best']:
+                        system = [x for x in self.path if x.name == each]
+                        assert len(system) == 1, each
+                        found_best.append(system[0])
                 else:
-                    # reject all sub path when first jump is too long (minus start, finish, elem)
-                    self.rcount += math.factorial(len(self.path) - 3)
+                    found_len, found_best = self._best_path(first_path, limit, skip_minor)
+                    data = {'found_len': found_len,
+                            'found_best': [x.name for x in found_best]}
+                    self.save(json.dumps(data))
 
-                if indx < len(best_path) - 1:
-                    best_path[0], best_path[indx + 1] = best_path[indx + 1], best_path[0]
+                return found_len, found_best
 
-            self.print('BP:', found_len, found_best)
-            # assert len(best_path) == len(self.poi), len(self.poi)
-            # assert best_path is not None
+    def _best_path(self, first_path, limit, skip_minor):
+        # for every poi
+        tpath = self.path[1:-1]
+        if skip_minor:
+            tpath = [x for x in tpath if not isinstance(x, mSystem)]
+            self.poi_len = len(tpath)
 
-            return found_len, found_best
+        if self.level == 0:
+            random.shuffle(tpath)
+
+        found_best = [self.path[0]] + tpath + [self.path[-1]]
+
+        best_path = copy.copy(found_best[1:])
+        found_len = first_path
+        self.print('starting best path # of poi:', len(best_path))
+
+        # try all combinations (exclude finish)
+        for indx in range(len(best_path) - 1):
+            elem = best_path[0]
+            self.print('indx', indx, elem)
+            # next distance on this path (excluding self.start)
+            # print(best_path)
+
+            first_jump = self.start.distance_to(elem)
+            next_limit = limit - first_jump
+            self.print('first jump', first_jump, elem, 'next limit', next_limit)
+
+            if next_limit > 0:
+                self.print('going sub path')
+                subdistance = Distance(best_path)
+                subdistance.level = self.level + 2
+                sub_best_len, sub_best_path = subdistance.best_path(next_limit)
+
+                self.pcount += subdistance.pcount
+                self.rcount += subdistance.rcount
+
+                if first_jump + sub_best_len < limit:
+                    self.print('path looks like shorter', self.start, sub_best_path)
+                    limit = first_jump + sub_best_len
+                    found_len = limit
+                    found_best = copy.copy([self.start] + sub_best_path)
+                else:
+                    self.print('path is not shorter')
+            else:
+                # reject all sub path when first jump is too long (minus start, finish, elem)
+                self.rcount += math.factorial(len(self.path) - 3)
+
+            if indx < len(best_path) - 1:
+                best_path[0], best_path[indx + 1] = best_path[indx + 1], best_path[0]
+
+        self.print('BP:', found_len, found_best)
+        # assert len(best_path) == len(self.poi), len(self.poi)
+        # assert best_path is not None
+
+        return found_len, found_best
 
     def scale(self):
         ret = {}
@@ -245,7 +272,8 @@ class Distance(object):
 
         best_l = 0
         best_best = None
-        N = 3
+        # FIXME N might need better logic
+        N = min(3, middle)
         for n in range(-N, N + 1):
             p_one = Distance([self.start] + scaled[:middle + n +1])
             p_two = Distance(scaled[middle + n:] + [self.finish])

@@ -23,12 +23,15 @@ class FileCache(object):
 
     @staticmethod
     def set_fname(utf8_encoded_name):
-        _hash = hashlib.sha256(utf8_encoded_name).hexdigest()
-        base_dir = os.path.join(FileCache.CACHE_DIR, _hash[:FileCache._DIR_CHAR])
-        if not os.path.exists(base_dir):
-            os.mkdir(base_dir)
+        if utf8_encoded_name:
+            _hash = hashlib.sha256(utf8_encoded_name).hexdigest()
+            base_dir = os.path.join(FileCache.CACHE_DIR, _hash[:FileCache._DIR_CHAR])
+            if not os.path.exists(base_dir):
+                os.mkdir(base_dir)
 
-        return os.path.join(base_dir, _hash[FileCache._DIR_CHAR:])
+            return os.path.join(base_dir, _hash[FileCache._DIR_CHAR:])
+        else:
+            return None
 
     @property
     def fname(self):
@@ -39,12 +42,16 @@ class FileCache(object):
         self.__fname = FileCache.set_fname(value)
 
     def save(self, data):
-        with open(self.fname, 'w') as f:
-            f.write(data)
+        if self.fname:
+            with open(self.fname, 'w') as f:
+                f.write(data)
+
+        # else:
+            # print('WARNING data was not saved because fname is Not set')
 
     @contextmanager
     def open(self):
-        if os.path.exists(self.fname):
+        if self.fname and os.path.exists(self.fname):
             # print('Loading from file')
             with open(self.fname) as f:
                 yield f
