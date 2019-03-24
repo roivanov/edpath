@@ -1,4 +1,11 @@
-"""main code"""
+"""
+main code
+
+TODO prespawn and keep threads running
+TODO remove duplicated in systems (this disables returning to poi)
+TODO cache poi computed best path: sort poi, create checksum, save best path
+"""
+
 from __future__ import print_function, unicode_literals
 
 import config
@@ -24,7 +31,7 @@ def wrap_to_profile(func):
 
 if __name__ == '__main__':
     # direct path from A to Z
-    mypath = Distance(config.WP7TO8TXT + config.WP8TO9TXT)
+    mypath = Distance(config.WP7TO8TXT) # + config.WP8TO9TXT)
     print('Direct path is %.2f ly' % mypath.direct_length)
 
     mypath.print_path(mypath.best_path_with_split()[-1])
