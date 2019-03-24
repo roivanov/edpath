@@ -7,11 +7,24 @@ from __future__ import print_function, unicode_literals
 import copy
 import math
 import random
+import threading
 from collections import namedtuple
 
 from edsystems import System, mSystem
 
 DEBUG = False
+THREADS = True
+
+class _T_Distance(threading.Thread):
+    def __init__(self, dist):
+        assert isinstance(dist, Distance)
+        self._dist = dist
+        self.best = None
+        threading.Thread.__init__(self)
+
+    def run(self):
+        self.best = self._dist.best_path()
+
 
 class Distance(object):
     """
@@ -234,9 +247,20 @@ class Distance(object):
         best_best = None
         for n in range(-1, 2):
             p_one = Distance([self.start] + scaled[:middle + n +1])
-            path_one = p_one.best_path(skip_minor=skip_minor)[-1]
             p_two = Distance(scaled[middle + n:] + [self.finish])
-            path_two = p_two.best_path(skip_minor=skip_minor)[-1]
+            if THREADS:
+                t_one = _T_Distance(p_one)
+                t_two = _T_Distance(p_two)
+                t_one.start()
+                t_two.start()
+                t_one.join()
+                t_two.join()
+                path_one = t_one.best[-1]
+                path_two = t_two.best[-1]
+            else:
+                path_one = p_one.best_path(skip_minor=skip_minor)[-1]
+                path_two = p_two.best_path(skip_minor=skip_minor)[-1]
+
             assert path_one[-1] == path_two[0]
 
             test_path = path_one + path_two[1:]
