@@ -49,7 +49,7 @@ class System(Coords, FileCache):
             if f:
                 data = json.load(f)
             else:
-                print('Connecting to EDSM')
+                print('Connecting to EDSM for [%s]' % self._name)
                 params = OrderedDict([('systemName', self._name), ('showCoordinates', 1)])
                 r = requests.get(API_CALL, params=urllib.urlencode(params))
                 if r.status_code == 200:

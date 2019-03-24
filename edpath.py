@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Find shortest path between two systems while visiting all POI in between
 """
@@ -29,9 +30,16 @@ class Distance(object):
         elif isinstance(dist, str):
             new_dist = []
             for each in dist.splitlines():
-                each = each.strip()
+                each = each.decode('utf-8').strip()
                 if each and each[0] != '#':
-                    arr = each.split('/', 2)
+                    each = each.replace('–', '-')
+                    if '- GalMap Ref:' in each:
+                        each = each.replace('- GalMap Ref:', '/')
+                        arr = [x.strip() for x in each.split('/', 2)]
+                        arr.reverse()
+                    else:
+                        arr = [x.strip() for x in each.split('/', 2)]
+
                     if len(arr) == 1 or arr[0] == arr[1]:
                         new_dist.append(System(name=arr[0]))
                     elif arr[1][0] == '_':

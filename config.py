@@ -1,4 +1,5 @@
-# pylint: disable=missing-docstring
+# -*- coding: utf-8 -*-
+# # pylint: disable=missing-docstring
 
 from edsystems import System, Coords, mSystem
 
@@ -76,18 +77,16 @@ WP7TO8TXT = """
 Sagittarius A*
 # Major POI
 #1/1,2,3
-Phua Aub VY-S e3-3899/Phua Aub Archer Beta
-Phua Aub MX-U e2-7396/Phua Aub Archer Epsilon
-Phua Aub SJ-R e4-8234/Phua Aub Archer Kappa
+Phua Aub Archer Beta - GalMap Ref: Phua Aub VY-S e3-3899
+Phua Aub Archer Epsilon - GalMap Ref: Phua Aub MX-U e2-7396
+Phua Aub Archer Kappa - GalMap Ref: Phua Aub SJ-R e4-8234
 
 #2
-Phipoea WK-E d12-1374/Crown Of Ice
-Phipoea HJ-D c27-5254/Silver Highway
-#3
-Rothaei SI-B e2047/Dark Eye Nebula [*]
-#4&5
-Braisio FR-V e2-293/Braisio Juliet Nebula Cluster
-Rhuedgie KN-T e3-721/Breakthrough Echoes
+Crown Of Ice - GalMap Ref: Phipoea WK-E d12-1374
+Silver Highway - GalMap Ref: Phipoea HJ-D c27-5254
+Dark Eye Nebula - GalMap Ref: Rothaei SI-B e2047
+Braisio Juliet Nebula Cluster – GalMap Ref: Braisio FR-V e2-293
+Breakthrough Echoes - GalMap Ref: Rhuedgie KN-T e3-721
 
 #Minor POI
 Juenae OX-U e2-8852/_Hengist Nebula
