@@ -352,7 +352,7 @@ class MultiDistance(object):
             if meta_dist:
                 if meta_dist.finish != distance.start:
                     best_len += meta_dist.finish.distance_to(distance.start)
-                meta_dist += distance
+                meta_dist += Distance(b)
             else:
                 meta_dist = Distance(b)
 

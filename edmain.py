@@ -1,7 +1,10 @@
 """
 main code
 
-TODO prespawn and keep threads running
+TODO Distance: prespawn and keep threads running
+TODO FileCahce: cache with class name
+TODO MultiDistane: threads in multipath
+TODO Distance: tune path length to cache
 """
 
 from __future__ import print_function, unicode_literals
@@ -29,6 +32,7 @@ def wrap_to_profile(func):
 
 if __name__ == '__main__':
     # direct path from A to Z
+    # mypath = MultiDistance(Distance(config.WP8TO9TXT))
     mypath = MultiDistance(Distance(config.WP7TO8TXT),
                            Distance(config.WP8TO9TXT))
     # mypath = MultiDistance(config.WP7TO8TXT, config.WP8TO9TXT)
