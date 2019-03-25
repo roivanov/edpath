@@ -88,6 +88,15 @@ class Distance(FileCache):
         #         # self.path[0], self.path[indx] = self.path[indx], self.path[0]
         #         break
 
+        # Time      Cached  Caching Distance    Files in cache
+        # 2:23.76   -       4       34935.56    
+        # 2:17.08   4       -       37505.50    6089
+        # 2:13.47   -       4       34935.56    6089
+        # 2:27.94   4       -       38132.82    6089
+        # 2:23.59   4       -       36697.20    6089
+        # 2:36.15   4       -       34304.50    6089
+        # 2:11.48   4       -       33680.28    6089    # randomization disabled
+        # 2:12.80   4       -       -//-        -//-    # consistent with randomization disabled
         # set file cache
         if 3 < len(self.poi) < 5:
             arr = [self.start.name] + sorted([each.name for each in self.poi]) + [self.finish.name]
@@ -184,23 +193,17 @@ class Distance(FileCache):
     def best_path(self, limit=0, skip_minor=False):
         # find first path A->..->Z
 
-        first_path = Distance.__get_length(self.path)
-        self.print('First path len:', first_path)
-
-        if limit == 0:
-            limit = first_path
-
         # if no poi
         if len(self.poi) < 2:
             self.pcount += 1
             self.print('short path, returning')
-            return first_path, self.path
+            return Distance.__get_length(self.path), self.path
         else:
             with self.open() as f:
                 if f:
                     return self.from_dict(json.load(f))
                 else:
-                    found_len, found_best = self._best_path(first_path, limit, skip_minor)
+                    found_len, found_best = self.__best_path(limit, skip_minor)
                     self.save(json.dumps(self.to_dict(found_len, found_best)))
 
                     return found_len, found_best
@@ -223,7 +226,7 @@ class Distance(FileCache):
         return {'found_len': path_len,
                 'found_best': [x.name for x in path]}
 
-    def _best_path(self, first_path, limit, skip_minor):
+    def __best_path(self, limit=0, skip_minor=False):
         # for every poi
         tpath = self.path[1:-1]
         if skip_minor:
@@ -234,9 +237,13 @@ class Distance(FileCache):
         #     random.shuffle(tpath)
 
         found_best = [self.path[0]] + tpath + [self.path[-1]]
+        found_len = Distance.__get_length(self.path)
+        self.print('Starting with path len:', found_len)
+        if limit == 0:
+            limit = found_len
 
+        # this array we try all combinations
         best_path = copy.copy(found_best[1:])
-        found_len = first_path
         self.print('starting best path # of poi:', len(best_path))
 
         # try all combinations (exclude finish)
@@ -297,41 +304,41 @@ class Distance(FileCache):
                 return self.__find_among_sub(skip_minor)
 
     def __find_among_sub(self, skip_minor=False):
-                scaled = self.scale()
-                middle = len(scaled) / 2
+        scaled = self.scale()
+        middle = len(scaled) / 2
 
-                best_l = 0
-                best_best = None
-                # FIXME N might need better logic
-                N = min(3, middle)
-                for n in range(-N, N + 1):
-                    p_one = Distance([self.start] + scaled[:middle + n +1])
-                    p_two = Distance(scaled[middle + n:] + [self.finish])
-                    if THREADS:
-                        t_one = _T_Distance(p_one)
-                        t_two = _T_Distance(p_two)
-                        t_one.start()
-                        t_two.start()
-                        t_one.join()
-                        t_two.join()
-                        path_one = t_one.best[-1]
-                        path_two = t_two.best[-1]
-                    else:
-                        path_one = p_one.best_path(skip_minor=skip_minor)[-1]
-                        path_two = p_two.best_path(skip_minor=skip_minor)[-1]
+        best_l = 0
+        best_best = None
+        # FIXME N might need better logic
+        N = min(3, middle)
+        for n in range(-N, N + 1):
+            p_one = Distance([self.start] + scaled[:middle + n +1])
+            p_two = Distance(scaled[middle + n:] + [self.finish])
+            if THREADS:
+                t_one = _T_Distance(p_one)
+                t_two = _T_Distance(p_two)
+                t_one.start()
+                t_two.start()
+                t_one.join()
+                t_two.join()
+                path_one = t_one.best[-1]
+                path_two = t_two.best[-1]
+            else:
+                path_one = p_one.best_path(skip_minor=skip_minor)[-1]
+                path_two = p_two.best_path(skip_minor=skip_minor)[-1]
 
-                    assert path_one[-1] == path_two[0]
+            assert path_one[-1] == path_two[0]
 
-                    test_path = path_one + path_two[1:]
-                    l = Distance.__get_length(test_path)
-                    if best_l == 0 or l < best_l:
-                        best_l = l
-                        best_best = copy.copy(test_path)
-                        print(n, l, path_two[0].alias, len(path_one), len(path_two))
-                
-                self.save(json.dumps(self.to_dict(best_l, best_best)))
+            test_path = path_one + path_two[1:]
+            l = Distance.__get_length(test_path)
+            if best_l == 0 or l < best_l:
+                best_l = l
+                best_best = copy.copy(test_path)
+                print(n, l, path_two[0].alias, len(path_one), len(path_two))
+        
+        self.save(json.dumps(self.to_dict(best_l, best_best)))
 
-                return best_l, best_best
+        return best_l, best_best
 
     def __add__(self, other):
         assert isinstance(other, Distance)
