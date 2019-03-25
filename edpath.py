@@ -15,7 +15,7 @@ from edsystems import System, mSystem
 from filecache import FileCache
 
 DEBUG = False
-THREADS = True
+THREADS = False
 
 class _T_Distance(threading.Thread):
     def __init__(self, dist):
@@ -197,7 +197,11 @@ class Distance(FileCache):
         found_best = []
         for each in data['found_best']:
             system = [x for x in self.path if x.name == each]
-            assert len(system) == 1, each
+            try:
+                assert len(system) == 1, each
+            except AssertionError:
+                print(system)
+                raise
             found_best.append(system[0])
 
         return found_len, found_best
@@ -312,3 +316,44 @@ class Distance(FileCache):
                 self.save(json.dumps(self.to_dict(best_l, best_best)))
 
                 return best_l, best_best
+
+    def __add__(self, other):
+        assert isinstance(other, Distance)
+        if self.finish == other.start:
+            return Distance(self.path + other.path[1:])
+        else:
+            return Distance(self.path + other.path)
+
+class MultiDistance(object):
+    def __init__(self, *args):
+        self.distances = []
+        for each in args:
+            if isinstance(each, Distance):
+                self.distances.append(each)
+            else:
+                self.distances.append(Distance(each))
+
+    @property
+    def direct_length(self):
+        return self.distances[0].start.distance_to(self.distances[-1].finish)
+
+    @staticmethod
+    def print_path(best_path):
+        Distance.print_path(best_path)
+
+    def best_path_with_split(self, skip_minor=False):
+        best_len = 0
+        meta_dist = None
+        for indx, distance in enumerate(self.distances):
+            a, b = distance.best_path_with_split(skip_minor)
+
+            best_len += a
+
+            if meta_dist:
+                if meta_dist.finish != distance.start:
+                    best_len += meta_dist.finish.distance_to(distance.start)
+                meta_dist += distance
+            else:
+                meta_dist = Distance(b)
+
+        return best_len, meta_dist.path

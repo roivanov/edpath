@@ -102,6 +102,10 @@ class System(Coords, FileCache):
         """Get distance to other system"""
         return self.known_distance_to(other) or other.known_distance_to(self) or self._distance_to(other)
 
+    def __eq__(self, other):
+        assert isinstance(other, System)
+        return self.name == other.name
+
 class mSystem(System):
     @property
     def alias(self):
