@@ -9,6 +9,7 @@ import json
 import math
 import random
 import threading
+import warnings
 from collections import namedtuple
 
 from edsystems import System, mSystem
@@ -44,8 +45,9 @@ class Distance(FileCache):
     D4:          D->Z
     """
 
-    def __init__(self, dist, name=None):
+    def __init__(self, dist, name=None, skip_minor=False):
         self.name = name
+        self.skip_minor = skip_minor
 
         if isinstance(dist, list):
             pass
@@ -82,6 +84,12 @@ class Distance(FileCache):
 
         # full path as it comes in
         self.path = copy.copy(dist)
+
+        if self.skip_minor:
+            assert not isinstance(self.start, mSystem)
+            assert not isinstance(self.finish, mSystem)
+            self.path = [self.start] + [x for x in self.poi if not isinstance(x, mSystem)] + [self.finish]
+
         # swap: system marked with * is the real start
         # for indx, elem in enumerate(self.path):
         #     if '*' in elem.alias:
@@ -97,6 +105,7 @@ class Distance(FileCache):
         # 2:36.15   4       -       34304.50    6089
         # 2:11.48   4       -       33680.28    6089    # randomization disabled
         # 2:12.80   4       -       -//-        -//-    # consistent with randomization disabled
+        # 2:21.24   4       -       33287.00    6084    # even better
         # set file cache
         if 3 < len(self.poi) < 5:
             arr = [self.start.name] + sorted([each.name for each in self.poi]) + [self.finish.name]
@@ -143,7 +152,7 @@ class Distance(FileCache):
                 tlen[indx] = max(tlen[indx], len(elem))
         
         return tlen
-    
+
     @staticmethod
     def print_path(best_path):
         table = Distance._make_table(best_path)
@@ -182,12 +191,17 @@ class Distance(FileCache):
     def direct_length(self):
         return self.start.distance_to(self.finish)
 
+    def __iter__(self):
+        for _i in range(len(self) - 1):
+            yield (self.path[_i], self.path[_i + 1])
+
     @property
     def len_path_asis(self):
-        return Distance.__get_length(self.path)
+        return sum([a.distance_to(b) for (a, b) in self])
 
     @staticmethod
     def __get_length(path):
+        warnings.warn('use len_path_asis', PendingDeprecationWarning)
         return sum([path[_i].distance_to(path[_i + 1]) for _i in range(len(path) - 1)])
 
     def best_path(self, limit=0, skip_minor=False):
@@ -197,7 +211,7 @@ class Distance(FileCache):
         if len(self.poi) < 2:
             self.pcount += 1
             self.print('short path, returning')
-            return Distance.__get_length(self.path), self.path
+            return self.len_path_asis, self.path
         else:
             with self.open() as f:
                 if f:
@@ -226,18 +240,21 @@ class Distance(FileCache):
         return {'found_len': path_len,
                 'found_best': [x.name for x in path]}
 
+    def shuffle_poi(self):
+        tpath = self.poi
+        random.shuffle(tpath)
+        self.path = [self.start] + tpath + [self.finish]
+
     def __best_path(self, limit=0, skip_minor=False):
         # for every poi
-        tpath = self.path[1:-1]
-        if skip_minor:
-            tpath = [x for x in tpath if not isinstance(x, mSystem)]
-            self.poi_len = len(tpath)
+        temp_distance = Distance(self.path, skip_minor)
 
         # if self.level == 0:
-        #     random.shuffle(tpath)
+        #     temp_distance.shuffle_poi()
 
-        found_best = [self.path[0]] + tpath + [self.path[-1]]
-        found_len = Distance.__get_length(self.path)
+        found_best = temp_distance.path
+        found_len = temp_distance.len_path_asis
+
         self.print('Starting with path len:', found_len)
         if limit == 0:
             limit = found_len
