@@ -10,7 +10,8 @@ TODO Distance: print distance name
 
 from __future__ import print_function, unicode_literals
 
-import config
+import fileinput
+import string
 
 from edpath import Distance, MultiDistance
 
@@ -34,10 +35,13 @@ def wrap_to_profile(func):
 if __name__ == '__main__':
     # direct path from A to Z
     # mypath = MultiDistance(Distance(config.WP8TO9TXT))
-    mypath = MultiDistance(Distance(config.WP7TO8TXT),
-                           Distance(config.WP8TO9TXT))
+    # mypath = MultiDistance(Distance(config.WP7TO8TXT),
+    #                        Distance(config.WP8TO9TXT))
     # mypath = MultiDistance(config.WP7TO8TXT, config.WP8TO9TXT)
+
+    mypath = Distance(string.join(fileinput.input()))
     # mypath = Distance(config.WP8TO9TXT)
+
     print('Direct path is %.2f ly' % mypath.direct_length)
 
     mypath.print_path(mypath.best_path_with_split()[-1])

@@ -96,16 +96,6 @@ class Distance(FileCache):
         #         # self.path[0], self.path[indx] = self.path[indx], self.path[0]
         #         break
 
-        # Time      Cached  Caching Distance    Files in cache
-        # 2:23.76   -       4       34935.56    
-        # 2:17.08   4       -       37505.50    6089
-        # 2:13.47   -       4       34935.56    6089
-        # 2:27.94   4       -       38132.82    6089
-        # 2:23.59   4       -       36697.20    6089
-        # 2:36.15   4       -       34304.50    6089
-        # 2:11.48   4       -       33680.28    6089    # randomization disabled
-        # 2:12.80   4       -       -//-        -//-    # consistent with randomization disabled
-        # 2:21.24   4       -       33287.00    6084    # even better
         # set file cache
         if 3 < len(self.poi) < 5:
             arr = [self.start.name] + sorted([each.name for each in self.poi]) + [self.finish.name]
@@ -249,8 +239,8 @@ class Distance(FileCache):
         # for every poi
         temp_distance = Distance(self.path, skip_minor)
 
-        # if self.level == 0:
-        #     temp_distance.shuffle_poi()
+        if self.level == 0:
+            temp_distance.shuffle_poi()
 
         found_best = temp_distance.path
         found_len = temp_distance.len_path_asis
