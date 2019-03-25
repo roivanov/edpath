@@ -5,6 +5,7 @@ TODO Distance: prespawn and keep threads running
 TODO FileCahce: cache with class name
 TODO MultiDistane: threads in multipath
 TODO Distance: tune path length to cache
+TODO Distance: print distance name
 """
 
 from __future__ import print_function, unicode_literals

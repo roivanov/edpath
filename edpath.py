@@ -28,6 +28,11 @@ class _T_Distance(threading.Thread):
         self.best = self._dist.best_path()
 
 
+COLS = ('Name', 'Next', 'Path', 'Last')
+Table = namedtuple('Table', COLS)
+Table.__new__.__defaults__ = ('-',) * len(COLS)
+
+
 class Distance(FileCache):
     """
     D1: A->B->C->D->Z
@@ -39,7 +44,9 @@ class Distance(FileCache):
     D4:          D->Z
     """
 
-    def __init__(self, dist):
+    def __init__(self, dist, name=None):
+        self.name = name
+
         if isinstance(dist, list):
             pass
         elif isinstance(dist, str):
@@ -82,7 +89,7 @@ class Distance(FileCache):
         #         break
 
         # set file cache
-        if len(self.poi) > 6:
+        if 3 < len(self.poi) < 5:
             arr = [self.start.name] + sorted([each.name for each in self.poi]) + [self.finish.name]
             self.fname = ';'.join(arr)
         else:
@@ -103,29 +110,35 @@ class Distance(FileCache):
             self.print('' * self.level, *args)
 
     @staticmethod
-    def print_path(best_path):
-        COLS = ('Name', 'Next', 'Path', 'Last')
-        Table = namedtuple('Table', COLS)
-        Table.__new__.__defaults__ = ('-',) * len(COLS)
-
+    def _make_table(path):
         table = [Table(*COLS)]
 
-        for n, curr in enumerate(best_path):
-            if n < len(best_path) - 1:
-                to_last = Distance(best_path[n:])
+        for n, curr in enumerate(path):
+            if n < len(path) - 1:
+                to_last = Distance(path[n:])
                 table.append(Table(curr.alias,
-                                   '{: 5.2f} ly'.format(curr.distance_to(best_path[n + 1])),
+                                   '{: 5.2f} ly'.format(curr.distance_to(path[n + 1])),
                                    '{: 5.2f} ly'.format(to_last.len_path_asis),
                                    '{: 5.2f} ly'.format(to_last.direct_length)
                                    ))
             else:
                 table.append(Table(curr.alias))
 
+        return table
+
+    @staticmethod
+    def _make_tlen(table):
         tlen = [0] * len(COLS)
         for each in table:
             for indx, elem in enumerate(each):
                 tlen[indx] = max(tlen[indx], len(elem))
-
+        
+        return tlen
+    
+    @staticmethod
+    def print_path(best_path):
+        table = Distance._make_table(best_path)
+        tlen = Distance._make_tlen(table)
         sep = ['-' * each for each in tlen]
         table.append(sep)
         table.insert(0, sep)
@@ -324,6 +337,9 @@ class Distance(FileCache):
         else:
             return Distance(self.path + other.path)
 
+    def __len__(self):
+        return len(self.path)
+
 class MultiDistance(object):
     def __init__(self, *args):
         self.distances = []
@@ -344,6 +360,7 @@ class MultiDistance(object):
     def best_path_with_split(self, skip_minor=False):
         best_len = 0
         meta_dist = None
+        separate_at = []
         for indx, distance in enumerate(self.distances):
             a, b = distance.best_path_with_split(skip_minor)
 
@@ -355,5 +372,7 @@ class MultiDistance(object):
                 meta_dist += Distance(b)
             else:
                 meta_dist = Distance(b)
+            
+            separate_at.append(len(meta_dist))
 
         return best_len, meta_dist.path
