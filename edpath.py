@@ -230,8 +230,8 @@ class Distance(FileCache):
             tpath = [x for x in tpath if not isinstance(x, mSystem)]
             self.poi_len = len(tpath)
 
-        if self.level == 0:
-            random.shuffle(tpath)
+        # if self.level == 0:
+        #     random.shuffle(tpath)
 
         found_best = [self.path[0]] + tpath + [self.path[-1]]
 
@@ -294,6 +294,9 @@ class Distance(FileCache):
             if f:
                 return self.from_dict(json.load(f))
             else:
+                return self.__find_among_sub(skip_minor)
+
+    def __find_among_sub(self, skip_minor=False):
                 scaled = self.scale()
                 middle = len(scaled) / 2
 
