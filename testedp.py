@@ -209,3 +209,29 @@ Karkina Nebula - GalMap Ref: Eok Bluae GX-K d8-1521_
                                   'Hypiae Phyloi LR-C D22',
                                   'Swoals IL-Y e0'],
                                   [each.name for each in b])
+
+    def test_wp8to9(self):
+        with open('WP8TO9.txt') as f:
+            dist = Distance(string.join(f.readlines()))
+            a, b = dist.best_path_with_split()
+            self.assertAlmostEquals(18253.201664304757, a)
+            self.assertIsNotNone(b)
+            self.assertListEqual(['Sagittarius A*',
+                                  'Phua Aub VY-S e3-3899',
+                                  'Phua Aub MX-U e2-7396',
+                                  'Phua Aub SJ-R e4-8234',
+                                  'GRS 1739-278',
+                                  'Juenae OX-U e2-8852',
+                                  'Eok Bluae GX-K d8-1521',
+                                  'G2 Dust Cloud Sector JH-V c2-2851',
+                                  'Phipoea WK-E d12-1374',
+                                  'Phipoea HJ-D c27-5254',
+                                  'Dryau Chrea DB-F d11-3866',
+                                  'Rothaei SI-B e2047',
+                                  'Braisio FR-V e2-293',
+                                  'Lyaisae HA-A e3363',
+                                  'Eorl Broae EB-O e6-1507',
+                                  'Rhuedgie KN-T e3-721',
+                                  'Hypiae Phyloi LR-C D22',
+                                  'Swoals IL-Y e0'],
+                                  [each.name for each in b])
