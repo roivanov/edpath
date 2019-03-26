@@ -115,7 +115,7 @@ class Distance(FileCache):
 
     def print(self, *args):
         if DEBUG and self.level in DEBUG_LEVELS:
-            print('' * self.level, *args)
+            print(' ' * self.level, *args)
 
     @staticmethod
     def _make_table(path):
@@ -179,7 +179,6 @@ class Distance(FileCache):
 
     @property
     def path(self):
-        raise NotImplementedError('Is it really used?')
         return self._path
 
     @property
@@ -194,16 +193,11 @@ class Distance(FileCache):
     def len_path_asis(self):
         return sum([a.distance_to(b) for (a, b) in self])
 
-    @staticmethod
-    def __get_length(path):
-        warnings.warn('use len_path_asis', PendingDeprecationWarning)
-        return sum([path[_i].distance_to(path[_i + 1]) for _i in range(len(path) - 1)])
-
     def best_path(self, limit=0, skip_minor=False):
         # find first path A->..->Z
 
         # if no poi
-        if len(self.poi) < 2:
+        if len(self) <= 3:
             self.pcount += 1
             self.print('short path, returning')
             return self.len_path_asis, self._path
@@ -213,7 +207,8 @@ class Distance(FileCache):
                     return self.from_dict(json.load(f))
                 else:
                     found_len, found_best = self.__best_path(limit, skip_minor)
-                    self.save(json.dumps(self.to_dict(found_len, found_best)))
+                    if found_best:
+                        self.save(json.dumps(self.to_dict(found_len, found_best)))
 
                     return found_len, found_best
 
@@ -263,26 +258,24 @@ class Distance(FileCache):
         sub_path.level = self.level + 2
         sub_path.shuffle_poi()
 
-        self.print('starting best path # of poi:', len(sub_path))
+        self.print('starting best path # of len:', len(sub_path))
 
         # try all combinations (exclude finish)
-        for indx in range(len(sub_path) - 1):
+        for indx in range(1, len(sub_path)):
             self.print('indx', indx, sub_path.start)
             # next distance on this path (excluding self.start)
             # print(best_path)
 
             first_jump = self.start.distance_to(sub_path.start)
-            next_limit = limit - first_jump
-            self.print('first jump', first_jump, sub_path.start, 'next limit', next_limit)
 
-            if next_limit > 0:
-                self.print('going sub path')
-                sub_best_len, sub_best_path = sub_path.best_path(next_limit)
+            if first_jump < limit:
+                self.print('going sub path, first_jump= %.2f' % first_jump)
+                sub_best_len, sub_best_path = sub_path.best_path(limit - first_jump, skip_minor)
 
                 self.pcount += sub_path.pcount
                 self.rcount += sub_path.rcount
 
-                if first_jump + sub_best_len < limit:
+                if first_jump + sub_best_len < limit and sub_best_path:
                     self.print('path looks like shorter', self.start, sub_best_path)
                     limit = first_jump + sub_best_len
                     found_best = copy.copy([self.start] + sub_best_path)
@@ -293,17 +286,15 @@ class Distance(FileCache):
                 self.rcount += math.factorial(len(self._path) - 3)
 
             if indx < len(sub_path) - 1:
-                sub_path._swap(0, indx + 1)
+                sub_path._swap(0, indx)
 
-        self.print('BP:', limit, found_best or self._path)
-        # assert len(best_path) == len(self.poi), len(self.poi)
-        # assert best_path is not None
+        self.print('BP:', limit, found_best)
 
-        return limit, found_best or self._path
+        return limit, found_best
 
     def scale(self):
         ret = {}
-        for each in self._path[1:-1]:
+        for each in self.poi:
             a, b = self.start.distance_to(each), self.finish.distance_to(each)
             scale = a / (a + b)
             ret[scale] = each
@@ -345,7 +336,7 @@ class Distance(FileCache):
             assert path_one[-1] == path_two[0]
 
             test_path = path_one + path_two[1:]
-            l = Distance.__get_length(test_path)
+            l = Distance(test_path).len_path_asis
             if best_l == 0 or l < best_l:
                 best_l = l
                 best_best = copy.copy(test_path)
