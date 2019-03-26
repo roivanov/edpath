@@ -16,6 +16,7 @@ from edsystems import System, mSystem
 from filecache import FileCache
 
 DEBUG = False
+DEBUG_LEVELS = [0]
 THREADS = False
 
 class _T_Distance(threading.Thread):
@@ -97,7 +98,7 @@ class Distance(FileCache):
         #         break
 
         # set file cache
-        if 3 < len(self.poi) < 5:
+        if 30 < len(self.poi) < 50:
             arr = [self.start.name] + sorted([each.name for each in self.poi]) + [self.finish.name]
             self.fname = ';'.join(arr)
         else:
@@ -114,8 +115,8 @@ class Distance(FileCache):
         self.poi_len = len(self.path) - 2
 
     def print(self, *args):
-        if DEBUG:
-            self.print('' * self.level, *args)
+        if DEBUG and self.level in DEBUG_LEVELS:
+            print('' * self.level, *args)
 
     @staticmethod
     def _make_table(path):
@@ -231,31 +232,30 @@ class Distance(FileCache):
                 'found_best': [x.name for x in path]}
 
     def shuffle_poi(self):
-        tpath = self.poi
-        random.shuffle(tpath)
-        self.path = [self.start] + tpath + [self.finish]
+        if len(self) > 3:
+            tpath = self.poi
+            random.shuffle(tpath)
+            self.path = [self.start] + tpath + [self.finish]
 
     def __best_path(self, limit=0, skip_minor=False):
         # for every poi
-        temp_distance = Distance(self.path, skip_minor)
-
-        if self.level == 0:
-            temp_distance.shuffle_poi()
-
-        found_best = temp_distance.path
-        found_len = temp_distance.len_path_asis
+        found_best = self.path
+        found_len = self.len_path_asis
 
         self.print('Starting with path len:', found_len)
         if limit == 0:
             limit = found_len
 
         # this array we try all combinations
-        best_path = copy.copy(found_best[1:])
-        self.print('starting best path # of poi:', len(best_path))
+        sub_path = Distance(self.path[1:], skip_minor=skip_minor)
+        sub_path.level = self.level + 2
+        sub_path.shuffle_poi()
+
+        self.print('starting best path # of poi:', len(sub_path))
 
         # try all combinations (exclude finish)
-        for indx in range(len(best_path) - 1):
-            elem = best_path[0]
+        for indx in range(len(sub_path) - 1):
+            elem = sub_path.path[0]
             self.print('indx', indx, elem)
             # next distance on this path (excluding self.start)
             # print(best_path)
@@ -266,12 +266,10 @@ class Distance(FileCache):
 
             if next_limit > 0:
                 self.print('going sub path')
-                subdistance = Distance(best_path)
-                subdistance.level = self.level + 2
-                sub_best_len, sub_best_path = subdistance.best_path(next_limit)
+                sub_best_len, sub_best_path = sub_path.best_path(next_limit)
 
-                self.pcount += subdistance.pcount
-                self.rcount += subdistance.rcount
+                self.pcount += sub_path.pcount
+                self.rcount += sub_path.rcount
 
                 if first_jump + sub_best_len < limit:
                     self.print('path looks like shorter', self.start, sub_best_path)
@@ -284,8 +282,8 @@ class Distance(FileCache):
                 # reject all sub path when first jump is too long (minus start, finish, elem)
                 self.rcount += math.factorial(len(self.path) - 3)
 
-            if indx < len(best_path) - 1:
-                best_path[0], best_path[indx + 1] = best_path[indx + 1], best_path[0]
+            if indx < len(sub_path) - 1:
+                sub_path.path[0], sub_path.path[indx + 1] = sub_path.path[indx + 1], sub_path.path[0]
 
         self.print('BP:', found_len, found_best)
         # assert len(best_path) == len(self.poi), len(self.poi)
