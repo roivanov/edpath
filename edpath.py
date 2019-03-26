@@ -45,6 +45,8 @@ class Distance(FileCache):
     D3:       C->D->Z
     D4:          D->Z
     """
+    CACHE_MIN = 30
+    CACHE_MAX = 50
 
     def __init__(self, dist, name=None, skip_minor=False):
         self.name = name
@@ -97,7 +99,7 @@ class Distance(FileCache):
         #         break
 
         # set file cache
-        if 30 < len(self.poi) < 50:
+        if self.CACHE_MIN <= len(self.poi) <= self.CACHE_MAX:
             arr = [self.start.name] + sorted([each.name for each in self.poi]) + [self.finish.name]
             self.fname = ';'.join(arr)
         else:
@@ -333,6 +335,8 @@ class Distance(FileCache):
                 path_one = p_one.best_path(skip_minor=skip_minor)[-1]
                 path_two = p_two.best_path(skip_minor=skip_minor)[-1]
 
+            assert path_one is not None
+            assert path_two is not None
             assert path_one[-1] == path_two[0]
 
             test_path = path_one + path_two[1:]
