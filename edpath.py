@@ -49,11 +49,11 @@ class Distance(FileCache):
     def __init__(self, dist, name=None, skip_minor=False):
         self.name = name
         self.skip_minor = skip_minor
+        data = []
 
         if isinstance(dist, list):
-            pass
+            data = copy.copy(dist)
         elif isinstance(dist, str):
-            new_dist = []
             for each in dist.splitlines():
                 each = each.decode('utf-8').strip()
                 if each and each[0] != '#':
@@ -64,7 +64,7 @@ class Distance(FileCache):
                         arr.reverse()
                     else:
                         arr = [x.strip() for x in each.split('/', 2)]
-                    
+
                     # add as mSystem when name or alias starts or ends with _
                     s = System
                     for indx, elem in enumerate(arr):
@@ -73,23 +73,22 @@ class Distance(FileCache):
                             arr[indx] = elem.strip('_ ')
 
                     if len(arr) == 1 or arr[0] == arr[1]:
-                        new_dist.append(s(name=arr[0]))
+                        data.append(s(name=arr[0]))
                     else:
-                        new_dist.append(s(name=arr[0], alias=arr[1]))
-            dist = new_dist
+                        data.append(s(name=arr[0], alias=arr[1]))
         else:
             raise ValueError('Unsupported type')
 
-        if len(dist) < 2:
+        if len(data) < 2:
             raise ValueError('distance must be two or more poi')
 
         # full path as it comes in
-        self._path = copy.copy(dist)
-
         if self.skip_minor:
-            assert not isinstance(self.start, mSystem)
-            assert not isinstance(self.finish, mSystem)
-            self._path = [self.start] + [x for x in self.poi if not isinstance(x, mSystem)] + [self.finish]
+            assert not isinstance(data, mSystem)
+            assert not isinstance(data, mSystem)
+            self._path = [data[0]] + [x for x in data[1:-1] if not isinstance(x, mSystem)] + [data[-1]]
+        else:
+            self._path = copy.copy(data)
 
         # swap: system marked with * is the real start
         # for indx, elem in enumerate(self.path):
@@ -112,7 +111,7 @@ class Distance(FileCache):
 
         self.level = 0
         # we need this value for the case when we skip minor poi
-        self.poi_len = len(self._path) - 2
+        self.poi_len = len(self) - 2
 
     def print(self, *args):
         if DEBUG and self.level in DEBUG_LEVELS:
@@ -141,7 +140,7 @@ class Distance(FileCache):
         for each in table:
             for indx, elem in enumerate(each):
                 tlen[indx] = max(tlen[indx], len(elem))
-        
+
         return tlen
 
     @staticmethod
@@ -180,6 +179,7 @@ class Distance(FileCache):
 
     @property
     def path(self):
+        raise NotImplementedError('Is it really used?')
         return self._path
 
     @property
@@ -243,10 +243,10 @@ class Distance(FileCache):
 
     def __getitem__(self, key):
         return self._path[key]
-    
+
     def __setitem__(self, key, value):
         self._path[key] = value
-    
+
     def _swap(self, key1, key2):
         self[key1], self[key2] = self[key2], self[key1]
 
@@ -350,7 +350,7 @@ class Distance(FileCache):
                 best_l = l
                 best_best = copy.copy(test_path)
                 print(n, l, path_two[0].alias, len(path_one), len(path_two))
-        
+
         self.save(json.dumps(self.to_dict(best_l, best_best)))
 
         return best_l, best_best
@@ -397,7 +397,7 @@ class MultiDistance(object):
                 meta_dist += Distance(b)
             else:
                 meta_dist = Distance(b)
-            
+
             separate_at.append(len(meta_dist))
 
         return best_len, meta_dist.path
