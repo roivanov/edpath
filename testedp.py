@@ -149,13 +149,11 @@ Phua Aub Archer Kappa - GalMap Ref: Phua Aub SJ-R e4-8234
         self.assertAlmostEquals(1851.5503574292647, dist.len_path_asis)
         a, b = dist.best_path()
         self.assertAlmostEquals(1851.5503574292647, a)
-        # FIXME should not be None
-        self.assertIsNone(b)
-        # self.assertListEqual(['Sagittarius A*',
-        #                       'Phua Aub Archer Beta',
-        #                       'Phua Aub Archer Epsilon',
-        #                       'Phua Aub Archer Kappa'],
-        #                       [x.alias for x in b])
+        self.assertListEqual(['Sagittarius A*',
+                              'Phua Aub Archer Beta',
+                              'Phua Aub Archer Epsilon',
+                              'Phua Aub Archer Kappa'],
+                              [x.alias for x in b])
 
     def test_saga_seven(self):
         s = '''Sagittarius A*
@@ -214,24 +212,16 @@ Karkina Nebula - GalMap Ref: Eok Bluae GX-K d8-1521_
         with open('WP8TO9.txt') as f:
             dist = Distance(string.join(f.readlines()))
             a, b = dist.best_path_with_split()
-            self.assertAlmostEquals(18253.201664304757, a)
+            self.assertAlmostEquals(15033.802876313275, a)
             self.assertIsNotNone(b)
-            self.assertListEqual(['Sagittarius A*',
-                                  'Phua Aub VY-S e3-3899',
-                                  'Phua Aub MX-U e2-7396',
-                                  'Phua Aub SJ-R e4-8234',
-                                  'GRS 1739-278',
-                                  'Juenae OX-U e2-8852',
-                                  'Eok Bluae GX-K d8-1521',
-                                  'G2 Dust Cloud Sector JH-V c2-2851',
-                                  'Phipoea WK-E d12-1374',
-                                  'Phipoea HJ-D c27-5254',
-                                  'Dryau Chrea DB-F d11-3866',
-                                  'Rothaei SI-B e2047',
-                                  'Braisio FR-V e2-293',
-                                  'Lyaisae HA-A e3363',
-                                  'Eorl Broae EB-O e6-1507',
-                                  'Rhuedgie KN-T e3-721',
-                                  'Hypiae Phyloi LR-C D22',
-                                  'Swoals IL-Y e0'],
-                                  [each.name for each in b])
+            self.assertListEqual(['Goliath\'s Rest',
+                                  '_Hot Temptation',
+                                  '_The Remnants Trio',
+                                  '_Gaesous Twins',
+                                  '_Arach Nebula',
+                                  'Iris\' Missive',
+                                  'Blue Rhapsody Nebula',
+                                  'Forgotten Twins Nebula',
+                                  'Dances with Giants',
+                                  'Cerulean Tranquility'],
+                                  [each.alias for each in b])

@@ -254,6 +254,7 @@ class Distance(FileCache):
         self.print('Starting with path len:', self.len_path_asis)
         if limit == 0:
             limit = self.len_path_asis
+            found_best = copy.copy(self.path)
 
         # this array we try all combinations
         sub_path = Distance(self._path[1:], skip_minor=skip_minor)
