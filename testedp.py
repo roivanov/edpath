@@ -116,3 +116,40 @@ class TestEDPath(unittest.TestCase):
 
         self.assertSetEqual(set(arr), set(dest), 'Lost some values')
         self.assertEqual(1, 1)
+
+    def test_saga_one(self):
+        s = '''Sagittarius A*
+Phua Aub Archer Beta - GalMap Ref: Phua Aub VY-S e3-3899
+Phua Aub Archer Epsilon - GalMap Ref: Phua Aub MX-U e2-7396
+#Phua Aub Archer Kappa - GalMap Ref: Phua Aub SJ-R e4-8234
+'''
+        dist = Distance(s)
+
+        self.assertEqual(3, len(dist))
+        self.assertAlmostEquals(1117.0375812871348, dist.direct_length)
+        self.assertAlmostEquals(1388.475446592071, dist.len_path_asis)
+        a, b = dist.best_path()
+        self.assertAlmostEquals(1388.475446592071, a)
+        self.assertListEqual(['Sagittarius A*',
+                              'Phua Aub Archer Beta',
+                              'Phua Aub Archer Epsilon'],
+                              [x.alias for x in b])
+
+    def test_saga_two(self):
+        s = '''Sagittarius A*
+Phua Aub Archer Beta - GalMap Ref: Phua Aub VY-S e3-3899
+Phua Aub Archer Epsilon - GalMap Ref: Phua Aub MX-U e2-7396
+Phua Aub Archer Kappa - GalMap Ref: Phua Aub SJ-R e4-8234
+'''
+        dist = Distance(s)
+
+        self.assertEqual(4, len(dist))
+        self.assertAlmostEquals(1569.8244630297245, dist.direct_length)
+        self.assertAlmostEquals(1851.5503574292647, dist.len_path_asis)
+        a, b = dist.best_path()
+        self.assertAlmostEquals(1851.5503574292647, a)
+        self.assertListEqual(['Sagittarius A*',
+                              'Phua Aub Archer Beta',
+                              'Phua Aub Archer Epsilon',
+                              'Phua Aub Archer Kappa'],
+                              [x.alias for x in b])
