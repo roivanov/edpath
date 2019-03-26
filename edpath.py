@@ -84,12 +84,12 @@ class Distance(FileCache):
             raise ValueError('distance must be two or more poi')
 
         # full path as it comes in
-        self.path = copy.copy(dist)
+        self._path = copy.copy(dist)
 
         if self.skip_minor:
             assert not isinstance(self.start, mSystem)
             assert not isinstance(self.finish, mSystem)
-            self.path = [self.start] + [x for x in self.poi if not isinstance(x, mSystem)] + [self.finish]
+            self._path = [self.start] + [x for x in self.poi if not isinstance(x, mSystem)] + [self.finish]
 
         # swap: system marked with * is the real start
         # for indx, elem in enumerate(self.path):
@@ -112,7 +112,7 @@ class Distance(FileCache):
 
         self.level = 0
         # we need this value for the case when we skip minor poi
-        self.poi_len = len(self.path) - 2
+        self.poi_len = len(self._path) - 2
 
     def print(self, *args):
         if DEBUG and self.level in DEBUG_LEVELS:
@@ -168,15 +168,19 @@ class Distance(FileCache):
 
     @property
     def start(self):
-        return self.path[0]
+        return self._path[0]
 
     @property
     def finish(self):
-        return self.path[-1]
+        return self._path[-1]
 
     @property
     def poi(self):
-        return self.path[1:-1]
+        return self._path[1:-1]
+
+    @property
+    def path(self):
+        return self._path
 
     @property
     def direct_length(self):
@@ -184,7 +188,7 @@ class Distance(FileCache):
 
     def __iter__(self):
         for _i in range(len(self) - 1):
-            yield (self.path[_i], self.path[_i + 1])
+            yield (self._path[_i], self._path[_i + 1])
 
     @property
     def len_path_asis(self):
@@ -202,7 +206,7 @@ class Distance(FileCache):
         if len(self.poi) < 2:
             self.pcount += 1
             self.print('short path, returning')
-            return self.len_path_asis, self.path
+            return self.len_path_asis, self._path
         else:
             with self.open() as f:
                 if f:
@@ -217,7 +221,7 @@ class Distance(FileCache):
         found_len = data['found_len']
         found_best = []
         for each in data['found_best']:
-            system = [x for x in self.path if x.name == each]
+            system = [x for x in self._path if x.name == each]
             try:
                 assert len(system) == 1, each
             except AssertionError:
@@ -235,19 +239,27 @@ class Distance(FileCache):
         if len(self) > 3:
             tpath = self.poi
             random.shuffle(tpath)
-            self.path = [self.start] + tpath + [self.finish]
+            self._path = [self.start] + tpath + [self.finish]
+
+    def __getitem__(self, key):
+        return self._path[key]
+    
+    def __setitem__(self, key, value):
+        self._path[key] = value
+    
+    def _swap(self, key1, key2):
+        self[key1], self[key2] = self[key2], self[key1]
 
     def __best_path(self, limit=0, skip_minor=False):
         # for every poi
-        found_best = self.path
-        found_len = self.len_path_asis
+        found_best = None
 
-        self.print('Starting with path len:', found_len)
+        self.print('Starting with path len:', self.len_path_asis)
         if limit == 0:
-            limit = found_len
+            limit = self.len_path_asis
 
         # this array we try all combinations
-        sub_path = Distance(self.path[1:], skip_minor=skip_minor)
+        sub_path = Distance(self._path[1:], skip_minor=skip_minor)
         sub_path.level = self.level + 2
         sub_path.shuffle_poi()
 
@@ -255,14 +267,13 @@ class Distance(FileCache):
 
         # try all combinations (exclude finish)
         for indx in range(len(sub_path) - 1):
-            elem = sub_path.path[0]
-            self.print('indx', indx, elem)
+            self.print('indx', indx, sub_path.start)
             # next distance on this path (excluding self.start)
             # print(best_path)
 
-            first_jump = self.start.distance_to(elem)
+            first_jump = self.start.distance_to(sub_path.start)
             next_limit = limit - first_jump
-            self.print('first jump', first_jump, elem, 'next limit', next_limit)
+            self.print('first jump', first_jump, sub_path.start, 'next limit', next_limit)
 
             if next_limit > 0:
                 self.print('going sub path')
@@ -274,26 +285,25 @@ class Distance(FileCache):
                 if first_jump + sub_best_len < limit:
                     self.print('path looks like shorter', self.start, sub_best_path)
                     limit = first_jump + sub_best_len
-                    found_len = limit
                     found_best = copy.copy([self.start] + sub_best_path)
                 else:
                     self.print('path is not shorter')
             else:
                 # reject all sub path when first jump is too long (minus start, finish, elem)
-                self.rcount += math.factorial(len(self.path) - 3)
+                self.rcount += math.factorial(len(self._path) - 3)
 
             if indx < len(sub_path) - 1:
-                sub_path.path[0], sub_path.path[indx + 1] = sub_path.path[indx + 1], sub_path.path[0]
+                sub_path._swap(0, indx + 1)
 
-        self.print('BP:', found_len, found_best)
+        self.print('BP:', limit, found_best or self._path)
         # assert len(best_path) == len(self.poi), len(self.poi)
         # assert best_path is not None
 
-        return found_len, found_best
+        return limit, found_best or self._path
 
     def scale(self):
         ret = {}
-        for each in self.path[1:-1]:
+        for each in self._path[1:-1]:
             a, b = self.start.distance_to(each), self.finish.distance_to(each)
             scale = a / (a + b)
             ret[scale] = each
@@ -348,12 +358,12 @@ class Distance(FileCache):
     def __add__(self, other):
         assert isinstance(other, Distance)
         if self.finish == other.start:
-            return Distance(self.path + other.path[1:])
+            return Distance(self._path + other.path[1:])
         else:
-            return Distance(self.path + other.path)
+            return Distance(self._path + other.path)
 
     def __len__(self):
-        return len(self.path)
+        return len(self._path)
 
 class MultiDistance(object):
     def __init__(self, *args):
