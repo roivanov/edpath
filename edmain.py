@@ -32,25 +32,12 @@ def wrap_to_profile(func):
         return ret
     return _wrap
 
-if __name__ == '__main__':
-    # direct path from A to Z
-    # mypath = MultiDistance(Distance(config.WP8TO9TXT))
-    # mypath = MultiDistance(Distance(config.WP7TO8TXT),
-    #                        Distance(config.WP8TO9TXT))
-    # mypath = MultiDistance(config.WP7TO8TXT, config.WP8TO9TXT)
 
-    # with open('WP7TO8.txt') as f:
-        # mypath = Distance(string.join(f.readlines()))
-        # mypath = Distance(mypath.path[2:9])
+if __name__ == '__main__':
     mypath = Distance(string.join(fileinput.input()))
-    # mypath.shuffle_poi()
-    # mypath = Distance(config.WP8TO9TXT)
 
     print('Direct path is %.2f ly' % mypath.direct_length)
 
-    mypath.print_path(mypath.best_path_with_split()[-1])
-    # print(mypath.best_path())
-    # mypath.print_path(mypath.best_path()[-1])
+    mypath.print_path(mypath.best_path()[-1])
 
-    # stat is wrong because we call best_path three times and with three different lists
-    # mypath.print_stats()
+    mypath.print_cache_hit_histogram()

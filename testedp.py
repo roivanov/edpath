@@ -185,9 +185,10 @@ Karkina Nebula - GalMap Ref: Eok Bluae GX-K d8-1521_
     def test_wp7to8(self):
         with open('WP7TO8.txt') as f:
             dist = Distance(string.join(f.readlines()))
-            a, b = dist.best_path_with_split()
+            a, b = dist.best_path()
             self.assertAlmostEquals(18253.201664304757, a)
             self.assertIsNotNone(b)
+            self.maxDiff = None
             self.assertListEqual(['Sagittarius A*',
                                   'Phua Aub VY-S e3-3899',
                                   'Phua Aub MX-U e2-7396',
@@ -211,7 +212,7 @@ Karkina Nebula - GalMap Ref: Eok Bluae GX-K d8-1521_
     def test_wp8to9(self):
         with open('WP8TO9.txt') as f:
             dist = Distance(string.join(f.readlines()))
-            a, b = dist.best_path_with_split()
+            a, b = dist.best_path()
             self.assertAlmostEquals(15033.802876313275, a)
             self.assertIsNotNone(b)
             self.assertListEqual(['Goliath\'s Rest',

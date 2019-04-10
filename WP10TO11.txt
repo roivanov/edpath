@@ -1,0 +1,18 @@
+# START at
+Morphenniel Nebula - GalMap Ref: Bleethuae NI-B D674
+
+# MAJOR poi
+Aristo - GalMap Ref: PRU AUB DL-P E5-35
+Kalipheron - GalMap Ref: BYUA AUB WO-K B36-0
+
+# Off-Route POIs;
+#--Phoenix Nebula - GalMap Ref: Dryiquae SO-Z d13-3_
+#--Rendezvous Point - GalMap Ref: Rendezvous Point_
+Poseidon's Fury - GalMap Ref: Bleia Flyuae ZU-N d7-54_
+Misty Mountains of Byeia Free - GalMap Ref: Byeia Free WR-W b56-0_
+Hula Hoop - GalMap Ref: Striechooe HO-D c14-2_
+Shadow Earth - GalMap Ref: Smootoae VE-R d4-134_
+
+# FINISH
+# (Waypoint 11)
+Luna's Shadow - GalMap Ref: Smootoae QY-S d3-202
