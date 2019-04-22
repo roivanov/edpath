@@ -4,6 +4,7 @@ from __future__ import print_function
 import copy
 import math
 import string
+import time
 import unittest
 
 from edpath import Distance
@@ -226,3 +227,126 @@ Karkina Nebula - GalMap Ref: Eok Bluae GX-K d8-1521_
                                   'Dances with Giants',
                                   'Cerulean Tranquility'],
                                   [each.alias for each in b])
+
+    def test_wp9to10(self):
+        with open('WP9TO10.txt') as f:
+            dist = Distance(string.join(f.readlines()))
+            a, b = dist.best_path()
+            self.assertAlmostEquals(9587.24516209, a)
+            self.assertIsNotNone(b)
+            self.assertListEqual([u'Cerulean Tranquility',
+                                  u'_Undine Haven',
+                                  u'_The Briar Patch Nebula',
+                                  u'The Zinnia Haze',
+                                  u'Hydrangea Nebula',
+                                  u'Magnus Nebula',
+                                  u'_Infinite Bonds',
+                                  u'Neighbouring Necklaces',
+                                  u'_Eos Nebula',
+                                  u'Morphenniel Nebula'],
+                                  [each.alias for each in b])
+
+    def test_wp10to11(self):
+        with open('WP10TO11.txt') as f:
+            dist = Distance(string.join(f.readlines()))
+            a, b = dist.best_path()
+            self.assertAlmostEquals(31590.10519345, a)
+            self.assertIsNotNone(b)
+            self.assertListEqual([u'Morphenniel Nebula',
+                                  u'_Rendezvous Point',
+                                  u'Aristo',
+                                  u'_Phoenix Nebula',
+                                  u"_Poseidon's Fury",
+                                  u'Kalipheron',
+                                  u'_Misty Mountains of Byeia Free',
+                                  u'_Hula Hoop',
+                                  u'_Shadow Earth',
+                                  u"Luna's Shadow"],
+                                  [each.alias for each in b])
+
+    @unittest.skip('No data for 11 to 12 yet')
+    def test_wp11to12(self):
+        with open('WP11TO12.txt') as f:
+            dist = Distance(string.join(f.readlines()))
+            a, b = dist.best_path()
+            self.assertAlmostEquals(31590.10519345, a)
+            self.assertIsNotNone(b)
+            print([each.alias for each in b])
+            self.assertListEqual([u'Morphenniel Nebula',
+                                  u'_Rendezvous Point',
+                                  u'Aristo',
+                                  u'_Phoenix Nebula',
+                                  u"_Poseidon's Fury",
+                                  u'Kalipheron',
+                                  u'_Misty Mountains of Byeia Free',
+                                  u'_Hula Hoop',
+                                  u'_Shadow Earth',
+                                  u"Luna's Shadow"],
+                                  [each.alias for each in b])
+
+    def test_wp7to10(self):
+        arr = []
+        for fname in ['WP7TO8.txt', 'WP8TO9.txt', 'WP9TO10.txt']:
+            with open(fname) as f:
+                arr.extend(f.readlines())
+
+        _start = time.time()
+        dist = Distance(string.join(arr))
+        a, b = dist.best_path()
+        _finish = time.time()
+        self.assertAlmostEquals(42401.586920865564, a)
+        self.assertIsNotNone(b)
+        # print([each.alias for each in b])
+        # must finish in a minute
+        self.assertLess(_finish - _start, 42)
+        self.assertListEqual(
+            [u'Sagittarius A*', u'_Hengist Nebula', u'Phua Aub Archer Beta',
+             u'Phua Aub Archer Epsilon', u'Phua Aub Archer Kappa',
+             u'_GRS 1739-278', u'Crown Of Ice', u'Silver Highway',
+             u'_G2 Dust Cloud', u'_Karkina Nebula', u'Dark Eye Nebula',
+             u'_Stairway To Heaven', u'_Black Giants Nebula',
+             u'_Lyaisae Juliet Nebula Cluster', u'Breakthrough Echoes',
+             u'Hypiae Phyloi LR-C D22', u"Goliath's Rest", u'_Hot Temptation',
+             u'_The Remnants Trio', u'_Gaesous Twins',
+             u'Braisio Juliet Nebula Cluster', u'_Arach Nebula',
+             u"Iris' Missive", u'Blue Rhapsody Nebula',
+             u'Forgotten Twins Nebula', u'Dances with Giants',
+             u'Cerulean Tranquility', u'_Undine Haven',
+             u'_The Briar Patch Nebula', u'The Zinnia Haze',
+             u'Hydrangea Nebula', u'Magnus Nebula', u'_Infinite Bonds',
+             u'Neighbouring Necklaces', u'_Eos Nebula', u'Morphenniel Nebula'],
+            [each.alias for each in b])
+
+    def test_wp7to11(self):
+        arr = []
+        for fname in ['WP7TO8.txt', 'WP8TO9.txt', 'WP9TO10.txt', 'WP10TO11.txt']:
+            with open(fname) as f:
+                arr.extend(f.readlines())
+
+        _start = time.time()
+        dist = Distance(string.join(arr))
+        raise NotImplementedError
+        a, b = dist.best_path()
+        _finish = time.time()
+        self.assertAlmostEquals(42401.586920865564, a)
+        self.assertIsNotNone(b)
+        print([each.alias for each in b])
+        # must finish in a minute
+        self.assertLess(_finish - _start, 30)
+        self.assertListEqual(
+            [u'Sagittarius A*', u'_Hengist Nebula', u'Phua Aub Archer Beta',
+             u'Phua Aub Archer Epsilon', u'Phua Aub Archer Kappa',
+             u'_GRS 1739-278', u'Crown Of Ice', u'Silver Highway',
+             u'_G2 Dust Cloud', u'_Karkina Nebula', u'Dark Eye Nebula',
+             u'_Stairway To Heaven', u'_Black Giants Nebula',
+             u'_Lyaisae Juliet Nebula Cluster', u'Breakthrough Echoes',
+             u'Hypiae Phyloi LR-C D22', u"Goliath's Rest", u'_Hot Temptation',
+             u'_The Remnants Trio', u'_Gaesous Twins',
+             u'Braisio Juliet Nebula Cluster', u'_Arach Nebula',
+             u"Iris' Missive", u'Blue Rhapsody Nebula',
+             u'Forgotten Twins Nebula', u'Dances with Giants',
+             u'Cerulean Tranquility', u'_Undine Haven',
+             u'_The Briar Patch Nebula', u'The Zinnia Haze',
+             u'Hydrangea Nebula', u'Magnus Nebula', u'_Infinite Bonds',
+             u'Neighbouring Necklaces', u'_Eos Nebula', u'Morphenniel Nebula'],
+            [each.alias for each in b])

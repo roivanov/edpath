@@ -14,6 +14,7 @@ API_CALL = 'https://www.edsm.net/api-v1/system'
 # be polite, delay in seconds
 DELAY = 3
 
+
 class Coords(object):
     """XYZ coordinates"""
     def __init__(self, x, y, z):
@@ -30,6 +31,7 @@ class Coords(object):
 
     def __repr__(self):
         return 'Coords(x={x}, y={y}, z={z})'.format(x=self.x, y=self.y, z=self.z)
+
 
 class System(Coords, FileCache):
     """System we travel"""
@@ -105,6 +107,7 @@ class System(Coords, FileCache):
     def __eq__(self, other):
         assert isinstance(other, System)
         return self.name == other.name
+
 
 class mSystem(System):
     @property

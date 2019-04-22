@@ -46,91 +46,18 @@ Table = namedtuple('Table', COLS)
 Table.__new__.__defaults__ = ('-',) * len(COLS)
 
 
-class Distance(MemCache):
+class _BaseDistance(MemCache):
     """
-    D1: A->B->C->D->Z
-        +--+          first jump
-           +--------+ subdistance.best_len
-    D2:    B->C->D->Z or
-           B->D->C->Z
-    D3:       C->D->Z
-    D4:          D->Z
+    Distance from A to B with every POI unique (no duplicates)
     """
-    def __init__(self, dist, name=None, skip_minor=False, skip_dedup=False):
+    def __init__(self, dist, name=None):
         self.name = name
-        self.skip_minor = skip_minor
-        data = []
 
-        if isinstance(dist, list):
-            data = copy.copy(dist)
-        elif isinstance(dist, str):
-            for each in dist.splitlines():
-                each = each.decode('utf-8').strip()
-                if each and each[0] != '#':
-                    each = each.replace('–', '-')
-                    if '- GalMap Ref:' in each:
-                        each = each.replace('- GalMap Ref:', '/')
-                        arr = [x.strip() for x in each.split('/', 2)]
-                        arr.reverse()
-                    else:
-                        arr = [x.strip() for x in each.split('/', 2)]
-
-                    # add as mSystem when name or alias starts or ends with _
-                    s = System
-                    for indx, elem in enumerate(arr):
-                        if elem[0] == '_' or elem[-1] == '_':
-                            s = mSystem
-                            arr[indx] = elem.strip('_ ')
-
-                    if len(arr) == 1 or arr[0] == arr[1]:
-                        data.append(s(name=arr[0]))
-                    else:
-                        data.append(s(name=arr[0], alias=arr[1]))
-        else:
-            raise ValueError('Unsupported type')
-
-        # remove duplicates as it confuses load_from_json
-        if not skip_dedup:
-            dedup = [data[0], data[-1]]
-            for each in data[1:-1]:
-                if each not in dedup:
-                    dedup.append(each)
-
-            assert len(data) >= len(dedup)
-            data = [dedup[0]] + [x for x in dedup[2:]] + [dedup[1]]
-
-        if len(data) < 2:
+        assert isinstance(dist, list)
+        if len(dist) < 2:
             raise ValueError('distance must be two or more poi')
 
-        # full path as it comes in
-        if self.skip_minor:
-            assert not isinstance(data, mSystem)
-            assert not isinstance(data, mSystem)
-            self._path = [data[0]] + [x for x in data[1:-1]
-                                      if not isinstance(x, mSystem)] + [data[-1]]
-        else:
-            # To set a limit
-            # self._path = copy.copy(data[:37])
-            self._path = copy.copy(data)
-        # :32           seq mc15:   1:55 (47087) 41MB
-        #                ng mc15:   1:54
-        # :33           seq mc15:   2:55 (37229)
-        #               seq mc20:   0:52 (38082)
-        # :34           seq mc20:   1:10 (41042)
-        #               seq mc21:   0:55 (41102)
-        #               seq mc22:   0:53 (41142)
-        # :35           seq mc22:   1:31 (51890)
-        #               seq mc23:   1:03 (51937) 45MB
-        #               seq mc24:   1:04 (51970)
-        #             seq mc4-24:   1:09 (45027) 43MB
-        # :36           seq mc24:   1:15 (56550)
-        #               seq mc25:   1:12 (56583) 48MB
-        #               seq mc26:   1:14 (56606)
-        # :37           seq mc26:   1:13
-        # oo            seq mc26:   1:10
-        #               seq mc28:   1:07
-        #               seq mc32:   1:06
-
+        self._path = copy.copy(dist)
 
         # swap: system marked with * is the real start
         # for indx, elem in enumerate(self.path):
@@ -140,7 +67,7 @@ class Distance(MemCache):
 
         # Cache tunables (len of poi)
         CACHE_MIN = 3
-        CACHE_MAX = 32
+        CACHE_MAX = 36
 
         # set file cache
         if CACHE_MIN <= len(self.poi) <= CACHE_MAX:
@@ -149,7 +76,7 @@ class Distance(MemCache):
         else:
             cache_name = None
 
-        super(Distance, self).__init__(cache_name=cache_name)
+        super(_BaseDistance, self).__init__(cache_name=cache_name)
 
         # path counted until the end
         self.pcount = 0
@@ -171,7 +98,7 @@ class Distance(MemCache):
 
         for n, curr in enumerate(path):
             if n < len(path) - 1:
-                to_last = Distance(path[n:], skip_dedup=True)
+                to_last = _BaseDistance(path[n:])
                 table.append(Table(curr.alias,
                                    '{: 5.2f} ly'.format(curr.distance_to(path[n + 1])),
                                    '{: 5.2f} ly'.format(to_last.len_path_asis),
@@ -193,8 +120,8 @@ class Distance(MemCache):
 
     @staticmethod
     def print_path(best_path):
-        table = Distance._make_table(best_path)
-        tlen = Distance._make_tlen(table)
+        table = _BaseDistance._make_table(best_path)
+        tlen = _BaseDistance._make_tlen(table)
         sep = ['-' * each for each in tlen]
         table.append(sep)
         table.insert(0, sep)
@@ -286,12 +213,6 @@ class Distance(MemCache):
         return {'found_len': path_len,
                 'found_best': [x.name for x in path]}
 
-    def shuffle_poi(self):
-        if len(self) > 3:
-            tpath = self.poi
-            random.shuffle(tpath)
-            self._path = [self.start] + tpath + [self.finish]
-
     def __getitem__(self, key):
         return self._path[key]
 
@@ -311,9 +232,8 @@ class Distance(MemCache):
             found_best = copy.copy(self.path)
 
         # this array we try all combinations
-        sub_path = Distance(self._path[1:], skip_dedup=True)
+        sub_path = _BaseDistance(self._path[1:])
         sub_path.level = self.level + 2
-        sub_path.shuffle_poi()
 
         self.print('starting best path # of len:', len(sub_path))
 
@@ -362,7 +282,7 @@ class Distance(MemCache):
             t_one.join()
             path_one = t_one.best[-1]
         else:
-            path_two, path_one = Distance.__with_threads(p_two, p_one)
+            path_two, path_one = _BaseDistance.__with_threads(p_two, p_one)
 
         return path_one, path_two
 
@@ -372,19 +292,19 @@ class Distance(MemCache):
         assert b is not None
         assert a[-1] == b[0]
 
-        return Distance(a + b[1:], skip_dedup=True)
+        return _BaseDistance(a + b[1:])
 
     def split(self, position):
-        p_one = Distance(self._path[:position + 1], skip_dedup=True)
+        p_one = _BaseDistance(self._path[:position + 1])
         p_one.level = self.level + 2
-        p_two = Distance(self._path[position:], skip_dedup=True)
+        p_two = _BaseDistance(self._path[position:])
         p_two.level = self.level + 2
 
         return p_one, p_two
 
     def slice(self, start, finish=-1):
         raise NotImplementedError
-        sub_path = Distance(self._path[start:finish], skip_dedup=True)
+        sub_path = _BaseDistance(self._path[start:finish])
         sub_path.level = self.level + 2
 
         return sub_path
@@ -414,10 +334,9 @@ class Distance(MemCache):
             # this will remove duplicates!!!
             ret[a / (a + b)] = each
 
-        scaled_distance = Distance([self.start] +
-                                   [ret[k] for k in sorted(ret.keys())] +
-                                   [self.finish],
-                                   skip_dedup=True)
+        scaled_distance = _BaseDistance([self.start] +
+                                        [ret[k] for k in sorted(ret.keys())] +
+                                        [self.finish])
         best_l = 0
         best_best = None
         for indx in self._seq_range(len(scaled_distance)):
@@ -430,10 +349,10 @@ class Distance(MemCache):
             assert len(p_one) > 2 and len(p_two) > 2, ratio
 
             if THREADS and min([len(p_one), len(p_two)]) > THREADS:
-                test_path = Distance.join(*self.__with_threads(p_one, p_two))
+                test_path = _BaseDistance.join(*self.__with_threads(p_one, p_two))
             else:
-                test_path = Distance.join(p_one.best_path()[-1],
-                                          p_two.best_path()[-1])
+                test_path = _BaseDistance.join(p_one.best_path()[-1],
+                                               p_two.best_path()[-1])
             
             _elapsed = time.time() - _start
             if ratio and _elapsed > 1:
@@ -449,11 +368,11 @@ class Distance(MemCache):
         return best_l, best_best
 
     def __add__(self, other):
-        assert isinstance(other, Distance)
+        assert isinstance(other, _BaseDistance)
         if self.finish == other.start:
-            return Distance(self._path + other.path[1:], skip_dedup=True)
+            return _BaseDistance(self._path + other.path[1:])
         else:
-            return Distance(self._path + other.path, skip_dedup=True)
+            return _BaseDistance(self._path + other.path)
 
     def __len__(self):
         return len(self._path)
@@ -461,6 +380,91 @@ class Distance(MemCache):
     @property
     def len_poi(self):
         return len(self._path) - 2
+
+
+class Distance(_BaseDistance):
+    def __init__(self, dist, name=None, skip_minor=False):
+        data = []
+
+        if isinstance(dist, list):
+            data = copy.copy(dist)
+        elif isinstance(dist, str):
+            for each in dist.splitlines():
+                each = each.decode('utf-8').strip()
+                if each and each[0] != '#':
+                    each = each.replace('–', '-')
+                    if '- GalMap Ref:' in each:
+                        each = each.replace('- GalMap Ref:', '/')
+                        arr = [x.strip() for x in each.split('/', 2)]
+                        arr.reverse()
+                    else:
+                        arr = [x.strip() for x in each.split('/', 2)]
+
+                    # add as mSystem when name or alias starts or ends with _
+                    s = System
+                    for indx, elem in enumerate(arr):
+                        if elem[0] == '_' or elem[-1] == '_':
+                            s = mSystem
+                            arr[indx] = elem.strip('_ ')
+
+                    if len(arr) == 1 or arr[0] == arr[1]:
+                        data.append(s(name=arr[0]))
+                    else:
+                        data.append(s(name=arr[0], alias=arr[1]))
+        else:
+            raise ValueError('Unsupported type')
+
+        if len(data) < 2:
+            raise ValueError('distance must be two or more poi')
+
+        # remove duplicates as it confuses load_from_json
+        dedup = [data[0], data[-1]]
+        for each in data[1:-1]:
+            if each not in dedup:
+                dedup.append(each)
+
+        assert len(data) >= len(dedup)
+        data = [dedup[0]] + [x for x in dedup[2:]] + [dedup[1]]
+
+        if skip_minor:
+            assert not isinstance(data, mSystem)
+            assert not isinstance(data, mSystem)
+            data = [data[0]] + [x for x in data[1:-1]
+                                if not isinstance(x, mSystem)] + [data[-1]]
+        else:
+            # To set a limit
+            # self._path = copy.copy(data[:37])
+            data = copy.copy(data)
+            # :32           seq mc15:   1:55 (47087) 41MB
+            #                ng mc15:   1:54
+            # :33           seq mc15:   2:55 (37229)
+            #               seq mc20:   0:52 (38082)
+            # :34           seq mc20:   1:10 (41042)
+            #               seq mc21:   0:55 (41102)
+            #               seq mc22:   0:53 (41142)
+            # :35           seq mc22:   1:31 (51890)
+            #               seq mc23:   1:03 (51937) 45MB
+            #               seq mc24:   1:04 (51970)
+            #             seq mc4-24:   1:09 (45027) 43MB
+            # :36           seq mc24:   1:15 (56550)
+            #               seq mc25:   1:12 (56583) 48MB
+            #               seq mc26:   1:14 (56606)
+            # :37           seq mc26:   1:13
+            # oo            seq mc26:   1:10
+            #               seq mc28:   1:07
+            #               seq mc32:   1:06
+
+        super(Distance, self).__init__(data, name)
+
+    def best_path(self, limit=0):
+        self.shuffle_poi()
+        return super(Distance, self).best_path(limit)
+
+    def shuffle_poi(self):
+        if len(self) > 3:
+            tpath = self.poi
+            random.shuffle(tpath)
+            self._path = [self.start] + tpath + [self.finish]
 
 
 class MultiDistance(object):
@@ -480,22 +484,22 @@ class MultiDistance(object):
     def print_path(best_path):
         Distance.print_path(best_path)
 
-    def best_path_with_split(self, skip_minor=False):
+    def best_path_with_split(self):
         best_len = 0
         meta_dist = None
         separate_at = []
         for indx, distance in enumerate(self.distances):
             assert isinstance(distance, Distance)
-            a, b = distance.best_path(skip_minor)
+            a, b = distance.best_path()
 
             best_len += a
 
             if meta_dist:
                 if meta_dist.finish != distance.start:
                     best_len += meta_dist.finish.distance_to(distance.start)
-                meta_dist += Distance(b, skip_dedup=True)
+                meta_dist += Distance(b)
             else:
-                meta_dist = Distance(b, skip_dedup=True)
+                meta_dist = Distance(b)
 
             separate_at.append(len(meta_dist))
 
