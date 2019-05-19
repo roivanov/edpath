@@ -11,11 +11,10 @@ import math
 import random
 import threading
 import time
-import warnings
 from collections import namedtuple
 
-from edsystems import System, mSystem
-from filecache import NoCache, FileCache, MemCache
+from src.edsystems import System, mSystem
+from src.filecache import NoCache, FileCache, MemCache
 
 DEBUG = False
 DEBUG_LEVELS = [0]

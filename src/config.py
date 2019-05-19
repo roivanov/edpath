@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # # pylint: disable=missing-docstring
 
-from edsystems import System, Coords, mSystem
+from src.edsystems import System, Coords, mSystem
 
 WP6TO7 = [System('Great Annihilator'),
 

@@ -7,8 +7,8 @@ import string
 import time
 import unittest
 
-from edpath import Distance
-from edsystems import Coords, System
+from src.edpath import Distance
+from src.edsystems import Coords, System
 
 
 class TestEDPath(unittest.TestCase):
@@ -184,7 +184,7 @@ Karkina Nebula - GalMap Ref: Eok Bluae GX-K d8-1521_
                               [x.alias for x in b])
 
     def test_wp7to8(self):
-        with open('WP7TO8.txt') as f:
+        with open('resources/WP7TO8.txt') as f:
             dist = Distance(string.join(f.readlines()))
             a, b = dist.best_path()
             self.assertAlmostEquals(18253.201664304757, a)
@@ -211,7 +211,7 @@ Karkina Nebula - GalMap Ref: Eok Bluae GX-K d8-1521_
                                   [each.name for each in b])
 
     def test_wp8to9(self):
-        with open('WP8TO9.txt') as f:
+        with open('resources/WP8TO9.txt') as f:
             dist = Distance(string.join(f.readlines()))
             a, b = dist.best_path()
             self.assertAlmostEquals(15033.802876313275, a)
@@ -229,7 +229,7 @@ Karkina Nebula - GalMap Ref: Eok Bluae GX-K d8-1521_
                                   [each.alias for each in b])
 
     def test_wp9to10(self):
-        with open('WP9TO10.txt') as f:
+        with open('resources/WP9TO10.txt') as f:
             dist = Distance(string.join(f.readlines()))
             a, b = dist.best_path()
             self.assertAlmostEquals(9587.24516209, a)
@@ -247,7 +247,7 @@ Karkina Nebula - GalMap Ref: Eok Bluae GX-K d8-1521_
                                   [each.alias for each in b])
 
     def test_wp10to11(self):
-        with open('WP10TO11.txt') as f:
+        with open('resources/WP10TO11.txt') as f:
             dist = Distance(string.join(f.readlines()))
             a, b = dist.best_path()
             self.assertAlmostEquals(31590.10519345, a)
@@ -287,7 +287,7 @@ Karkina Nebula - GalMap Ref: Eok Bluae GX-K d8-1521_
     def test_wp7to10(self):
         arr = []
         for fname in ['WP7TO8.txt', 'WP8TO9.txt', 'WP9TO10.txt']:
-            with open(fname) as f:
+            with open('resources/' + fname) as f:
                 arr.extend(f.readlines())
 
         _start = time.time()
@@ -320,7 +320,7 @@ Karkina Nebula - GalMap Ref: Eok Bluae GX-K d8-1521_
     def test_wp7to11(self):
         arr = []
         for fname in ['WP7TO8.txt', 'WP8TO9.txt', 'WP9TO10.txt', 'WP10TO11.txt']:
-            with open(fname) as f:
+            with open('resources/' + fname) as f:
                 arr.extend(f.readlines())
 
         _start = time.time()

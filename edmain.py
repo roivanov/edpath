@@ -13,7 +13,7 @@ from __future__ import print_function, unicode_literals
 import fileinput
 import string
 
-from edpath import Distance, MultiDistance
+from src.edpath import Distance
 
 
 def wrap_to_profile(func):

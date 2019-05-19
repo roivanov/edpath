@@ -8,7 +8,7 @@ from collections import OrderedDict
 
 import requests
 
-from filecache import FileCache
+from src.filecache import FileCache
 
 API_CALL = 'https://www.edsm.net/api-v1/system'
 # be polite, delay in seconds

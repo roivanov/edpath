@@ -136,7 +136,7 @@ class FileCache(MemCache):
     """File Cache of the objects or data"""
 
     # cache directory
-    CACHE_DIR = '.edpathcache'
+    CACHE_DIR = os.path.join(os.path.dirname(__file__), '.edpathcache')
     # number of chracters used to build cache tree
     _DIR_CHAR = 2
 
