@@ -184,7 +184,7 @@ Karkina Nebula - GalMap Ref: Eok Bluae GX-K d8-1521_
                               [x.alias for x in b])
 
     def test_wp7to8(self):
-        with open('resources/WP7TO8.txt') as f:
+        with open('tests/resources/WP7TO8.txt') as f:
             dist = Distance(string.join(f.readlines()))
             a, b = dist.best_path()
             self.assertAlmostEquals(18253.201664304757, a)
@@ -211,7 +211,7 @@ Karkina Nebula - GalMap Ref: Eok Bluae GX-K d8-1521_
                                   [each.name for each in b])
 
     def test_wp8to9(self):
-        with open('resources/WP8TO9.txt') as f:
+        with open('tests/resources/WP8TO9.txt') as f:
             dist = Distance(string.join(f.readlines()))
             a, b = dist.best_path()
             self.assertAlmostEquals(15033.802876313275, a)
@@ -229,7 +229,7 @@ Karkina Nebula - GalMap Ref: Eok Bluae GX-K d8-1521_
                                   [each.alias for each in b])
 
     def test_wp9to10(self):
-        with open('resources/WP9TO10.txt') as f:
+        with open('tests/resources/WP9TO10.txt') as f:
             dist = Distance(string.join(f.readlines()))
             a, b = dist.best_path()
             self.assertAlmostEquals(9587.24516209, a)
@@ -247,7 +247,7 @@ Karkina Nebula - GalMap Ref: Eok Bluae GX-K d8-1521_
                                   [each.alias for each in b])
 
     def test_wp10to11(self):
-        with open('resources/WP10TO11.txt') as f:
+        with open('tests/resources/WP10TO11.txt') as f:
             dist = Distance(string.join(f.readlines()))
             a, b = dist.best_path()
             self.assertAlmostEquals(31590.10519345, a)
@@ -266,10 +266,10 @@ Karkina Nebula - GalMap Ref: Eok Bluae GX-K d8-1521_
 
     @unittest.skip('No data for 11 to 12 yet')
     def test_wp11to12(self):
-        with open('WP11TO12.txt') as f:
+        with open('tests/resources/WP11TO12.txt') as f:
             dist = Distance(string.join(f.readlines()))
             a, b = dist.best_path()
-            self.assertAlmostEquals(31590.10519345, a)
+            self.assertAlmostEquals(20421.735521645227, a)
             self.assertIsNotNone(b)
             print([each.alias for each in b])
             self.assertListEqual([u'Morphenniel Nebula',
@@ -287,7 +287,7 @@ Karkina Nebula - GalMap Ref: Eok Bluae GX-K d8-1521_
     def test_wp7to10(self):
         arr = []
         for fname in ['WP7TO8.txt', 'WP8TO9.txt', 'WP9TO10.txt']:
-            with open('resources/' + fname) as f:
+            with open('tests/resources/' + fname) as f:
                 arr.extend(f.readlines())
 
         _start = time.time()
@@ -317,15 +317,16 @@ Karkina Nebula - GalMap Ref: Eok Bluae GX-K d8-1521_
              u'Neighbouring Necklaces', u'_Eos Nebula', u'Morphenniel Nebula'],
             [each.alias for each in b])
 
+    @unittest.skip('taking too long')
     def test_wp7to11(self):
         arr = []
         for fname in ['WP7TO8.txt', 'WP8TO9.txt', 'WP9TO10.txt', 'WP10TO11.txt']:
-            with open('resources/' + fname) as f:
+            with open('tests/resources/' + fname) as f:
                 arr.extend(f.readlines())
 
         _start = time.time()
         dist = Distance(string.join(arr))
-        raise NotImplementedError
+        # raise NotImplementedError
         a, b = dist.best_path()
         _finish = time.time()
         self.assertAlmostEquals(42401.586920865564, a)
@@ -350,3 +351,20 @@ Karkina Nebula - GalMap Ref: Eok Bluae GX-K d8-1521_
              u'Hydrangea Nebula', u'Magnus Nebula', u'_Infinite Bonds',
              u'Neighbouring Necklaces', u'_Eos Nebula', u'Morphenniel Nebula'],
             [each.alias for each in b])
+
+    def test_eng_one(self):
+        dweller = System('Wyrd')
+        selene = System('Kuk')
+
+        self.assertAlmostEqual(40.71025909168965, dweller.distance_to(selene))
+
+        # dist = Distance(s)
+
+        # self.assertEqual(3, len(dist))
+        # self.assertAlmostEquals(1117.0375812871348, dist.direct_length)
+    
+    def test_engineers(self):
+        with open('tests/resources/WP_ENG.txt') as f:
+            dist = Distance(string.join(f.readlines()))
+            a, b = dist.best_path()
+            self.assertAlmostEqual(1727.0207094, a)
